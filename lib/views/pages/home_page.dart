@@ -17,34 +17,68 @@ class HomePage extends StatelessWidget {
               physics: NeverScrollableScrollPhysics(),
               children: [
                 _buildCard(context, Colors.red, Icons.edit, 'Laporan'),
-                _buildCard(context, Colors.green, Icons.book, 'Panduan Laporan'),
+                _buildCard(
+                  context,
+                  Colors.green,
+                  Icons.book,
+                  'Panduan Laporan',
+                ),
                 _buildCard(context, Colors.blue, Icons.article, 'Artikel'),
                 _buildCard(context, Colors.orange, Icons.help, 'Bantuan'),
               ],
             ),
             SizedBox(height: 20),
-            TextField(
-              decoration: InputDecoration(
-                hintText: 'Search...',
-                suffixIcon: Icon(Icons.search),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
+            Container(
+              margin: const EdgeInsets.symmetric(vertical: 8),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(16),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.grey.withOpacity(0.2),
+                    blurRadius: 8,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: TextField(
+                decoration: InputDecoration(
+                  hintText: 'Search...',
+                  suffixIcon: Icon(Icons.search),
+                  border: InputBorder.none, // <-- tanpa border
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 14,
+                  ),
                 ),
-                filled: true,
-                fillColor: Colors.white,
               ),
             ),
             SizedBox(height: 10),
-            TextField(
-              decoration: InputDecoration(
-                hintText: 'Masukkan Tracking ID...',
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
+            Container(
+              margin: const EdgeInsets.symmetric(vertical: 8),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(16),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.grey.withOpacity(0.2),
+                    blurRadius: 8,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: TextField(
+                decoration: InputDecoration(
+                  hintText: 'Masukkan Tracking ID...',
+                  border: InputBorder.none, // <-- tanpa border
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 14,
+                  ),
                 ),
-                filled: true,
-                fillColor: Colors.white,
               ),
             ),
+
             const SizedBox(height: 20),
             _statusCard('Pengaduan', '21 April 2025', 'Selesai', Colors.green),
             _statusCard('Penyusupan', '21 April 2025', 'Ditolak', Colors.red),
