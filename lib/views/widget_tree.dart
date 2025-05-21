@@ -16,61 +16,64 @@ class WidgetTree extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        leading: IconButton(
-          icon: Icon(Icons.comment),
-          color: Colors.amber,
-          onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) {
-                  return ChatPage();
-                },
-              ),
-            );
-          },
-        ),
-        title: Icon(Icons.person, color: Colors.purple),
-        centerTitle: true,
-        actions: [
-          IconButton(
-            icon: Icon(Icons.notifications, color: Colors.red),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) {
-                    return NotificationsPage();
-                  },
-                ),
-              );
-            },
-          ),
-          IconButton(
-            icon: Icon(Icons.settings),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) {
-                    return SettingsPage();
-                  },
-                ),
-              );
-            },
-          ),
-        ],
-        backgroundColor: Colors.grey,
-      ),
-      body: ValueListenableBuilder(
-        valueListenable: selectedPageNotifier,
-        builder: (context, selectedPage, child) {
-          return pages.elementAt(selectedPage);
-        },
-      ),
-      bottomNavigationBar: NavbarWidget(),
+    return ValueListenableBuilder<int>(
+      valueListenable: selectedPageNotifier,
+      builder: (context, selectedPage, child) {
+        return Scaffold(
+          appBar:
+              selectedPage == 1
+                  ? null
+                  : AppBar(
+                    leading: IconButton(
+                      icon: Icon(Icons.comment),
+                      color: Colors.amber,
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) {
+                              return ChatPage();
+                            },
+                          ),
+                        );
+                      },
+                    ),
+                    title: Icon(Icons.person, color: Colors.purple),
+                    centerTitle: true,
+                    actions: [
+                      IconButton(
+                        icon: Icon(Icons.notifications, color: Colors.red),
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) {
+                                return NotificationsPage();
+                              },
+                            ),
+                          );
+                        },
+                      ),
+                      IconButton(
+                        icon: Icon(Icons.settings),
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) {
+                                return SettingsPage();
+                              },
+                            ),
+                          );
+                        },
+                      ),
+                    ],
+                    backgroundColor: Colors.grey,
+                  ),
+          body: pages.elementAt(selectedPage),
+          bottomNavigationBar: NavbarWidget(),
+        );
+      },
     );
   }
 }
