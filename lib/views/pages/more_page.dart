@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:jaga_app/views/pages/feedback_page.dart';
+import 'package:jaga_app/views/pages/rateus_page.dart';
 
 class MorePage extends StatelessWidget {
   const MorePage({super.key});
@@ -6,38 +8,53 @@ class MorePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
-    double cardWidth = (screenWidth - 48) / 2; // 16 + 16 padding + 16 spacing
+    double cardWidth = (screenWidth - 48) / 2;
 
-    return SafeArea(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const SizedBox(height: 16),
-            const Text(
-              'MORE',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 32),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                MenuCard(
-                  icon: Icons.feedback_outlined,
-                  label: 'Feedback',
-                  iconColor: Colors.white,
-                  width: cardWidth,
-                ),
-                MenuCard(
-                  icon: Icons.star,
-                  label: 'Rate Us',
-                  iconColor: Colors.amber,
-                  width: cardWidth,
-                ),
-              ],
-            ),
-          ],
+    return Scaffold(
+      backgroundColor: Colors.white,
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const SizedBox(height: 16),
+              const Text(
+                'MORE',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 32),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  MenuCard(
+                    icon: Icons.feedback_outlined,
+                    label: 'Feedback',
+                    iconColor: Colors.white,
+                    width: cardWidth,
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const FeedbackPage()),
+                      );
+                    },
+                  ),
+                  MenuCard(
+                    icon: Icons.star,
+                    label: 'Rate Us',
+                    iconColor: Colors.amber,
+                    width: cardWidth,
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const RateUsPage()),
+                      );
+                    },
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -49,6 +66,7 @@ class MenuCard extends StatelessWidget {
   final String label;
   final Color iconColor;
   final double width;
+  final VoidCallback? onTap;
 
   const MenuCard({
     super.key,
@@ -56,6 +74,7 @@ class MenuCard extends StatelessWidget {
     required this.label,
     required this.width,
     this.iconColor = Colors.white,
+    this.onTap,
   });
 
   @override
@@ -64,7 +83,7 @@ class MenuCard extends StatelessWidget {
       elevation: 4,
       borderRadius: BorderRadius.circular(12),
       child: InkWell(
-        onTap: () {},
+        onTap: onTap,
         borderRadius: BorderRadius.circular(12),
         child: Container(
           width: width,
