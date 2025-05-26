@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
+import 'layout/welcome_page.dart';
 import 'package:jaga_app/core/notifiers/theme_notifier.dart';
 import 'package:jaga_app/core/theme/app_theme.dart';
-import 'layout/widget_tree.dart';
 
 class MyApp extends StatefulWidget {
   const MyApp({super.key});
@@ -31,7 +31,7 @@ class _MyAppState extends State<MyApp> {
           theme: AppTheme.lightTheme,
           darkTheme: AppTheme.darkTheme,
           themeMode: isDarkMode ? ThemeMode.dark : ThemeMode.light,
-          home: const WidgetTree(),
+          home: const WelcomePage(),
         );
       },
     );
