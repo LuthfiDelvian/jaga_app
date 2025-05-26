@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:jaga_app/app/pages/chat_page.dart';
 import 'package:jaga_app/app/pages/notifications_page.dart';
-import 'package:jaga_app/app/pages/settings_page.dart';
+import 'package:jaga_app/app/pages/settings/pages/settings_page.dart';
 
 PreferredSizeWidget? buildCustomAppBar(BuildContext context, int selectedPage) {
   if (selectedPage == 1) return null;

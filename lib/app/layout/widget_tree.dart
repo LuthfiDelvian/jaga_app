@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:jaga_app/app/layout/custom_app_bar.dart';
 import 'package:jaga_app/app/layout/navigation_config.dart';
-import 'package:jaga_app/app/widgets/navbar_widget.dart';
+import 'package:jaga_app/app/widgets/bottom_navbar_widget.dart';
 import 'package:jaga_app/core/notifiers/notifiers.dart';
 
 class WidgetTree extends StatelessWidget {

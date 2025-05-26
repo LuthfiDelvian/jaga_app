@@ -18,7 +18,7 @@ class _MyAppState extends State<MyApp> {
   }
 
   void initThemeMode() {
-    isDarkModeNotifier.value = false; // Bisa diganti dengan baca dari SharedPreferences
+    isDarkModeNotifier.value = false;
   }
 
   @override
