@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:jaga_app/views/pages/feedback_page.dart';
-import 'package:jaga_app/views/pages/rateus_page.dart';
+import 'package:jaga_app/app/pages/feedback_page.dart';
+import 'package:jaga_app/app/pages/rateus_page.dart';
 
 class MorePage extends StatelessWidget {
   const MorePage({super.key});

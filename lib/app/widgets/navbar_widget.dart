@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:jaga_app/data/notifiers.dart';
+import 'package:jaga_app/core/notifiers/notifiers.dart';
 
 class NavbarWidget extends StatelessWidget {
   const NavbarWidget({super.key});
