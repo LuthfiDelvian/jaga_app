@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:jaga_app/app/pages/login_register_page.dart';
 
 class CustomHomeAppBar extends StatelessWidget implements PreferredSizeWidget {
   const CustomHomeAppBar({super.key});
@@ -14,13 +15,13 @@ class CustomHomeAppBar extends StatelessWidget implements PreferredSizeWidget {
       title: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Image.asset(
-            'assets/images/jaga-icon.png',
-            height: 100,
-          ),
+          Image.asset('assets/images/jaga-icon.png', height: 100),
           ElevatedButton(
             onPressed: () {
-              // Arahkan ke halaman login atau lainnya
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const LoginRegisterPage()),
+              );
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.red,
@@ -29,10 +30,7 @@ class CustomHomeAppBar extends StatelessWidget implements PreferredSizeWidget {
                 borderRadius: BorderRadius.circular(4),
               ),
             ),
-            child: const Text(
-              'MASUK',
-              style: TextStyle(color: Colors.white),
-            ),
+            child: const Text('MASUK', style: TextStyle(color: Colors.white)),
           ),
         ],
       ),
