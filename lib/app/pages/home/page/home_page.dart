@@ -10,37 +10,53 @@ class HomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: const CustomHomeAppBar(),
-      body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 10.0),
-        child: SingleChildScrollView(
-          child: Column(
-            children: const [
-              HomeMenuGrid(),
-              SizedBox(height: 20),
-              HomeSearchAndTracking(),
-              SizedBox(height: 20),
-              StatusCard(
-                title: 'Pengaduan',
-                date: '21 April 2025',
-                status: 'Selesai',
-                statusColor: Colors.green,
+      body: CustomScrollView(
+        slivers: [
+          SliverAppBar(
+            backgroundColor: Colors.white,
+            floating: true,
+            snap: true,
+            elevation: 0,
+            automaticallyImplyLeading: false,
+            flexibleSpace: SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                child: CustomHomeAppBar(),
               ),
-              StatusCard(
-                title: 'Penyusupan',
-                date: '21 April 2025',
-                status: 'Ditolak',
-                statusColor: Colors.red,
-              ),
-              StatusCard(
-                title: 'Aspirasi',
-                date: '21 April 2025',
-                status: 'Diproses',
-                statusColor: Colors.orange,
-              ),
-            ],
+            ),
           ),
-        ),
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 10.0),
+              child: Column(
+                children: const [
+                  HomeMenuGrid(),
+                  SizedBox(height: 20),
+                  HomeSearchAndTracking(),
+                  SizedBox(height: 20),
+                  StatusCard(
+                    title: 'Pengaduan',
+                    date: '21 April 2025',
+                    status: 'Selesai',
+                    statusColor: Colors.green,
+                  ),
+                  StatusCard(
+                    title: 'Penyusupan',
+                    date: '21 April 2025',
+                    status: 'Ditolak',
+                    statusColor: Colors.red,
+                  ),
+                  StatusCard(
+                    title: 'Aspirasi',
+                    date: '21 April 2025',
+                    status: 'Diproses',
+                    statusColor: Colors.orange,
+                  ),
+                ],
+              ),
+            ),
+          )
+        ],
       ),
     );
   }

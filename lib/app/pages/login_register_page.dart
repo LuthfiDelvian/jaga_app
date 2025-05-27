@@ -7,7 +7,8 @@ class LoginRegisterPage extends StatefulWidget {
   State<LoginRegisterPage> createState() => _LoginRegisterPageState();
 }
 
-class _LoginRegisterPageState extends State<LoginRegisterPage> with SingleTickerProviderStateMixin {
+class _LoginRegisterPageState extends State<LoginRegisterPage>
+    with SingleTickerProviderStateMixin {
   late TabController _tabController;
   bool _hidePassword = true;
   bool _hideConfirmPassword = true;
@@ -40,10 +41,7 @@ class _LoginRegisterPageState extends State<LoginRegisterPage> with SingleTicker
               indicatorColor: Colors.red,
               labelColor: Colors.red,
               unselectedLabelColor: Colors.black,
-              tabs: const [
-                Tab(text: "Masuk"),
-                Tab(text: "Daftar"),
-              ],
+              tabs: const [Tab(text: "Masuk"), Tab(text: "Daftar")],
             ),
             const SizedBox(height: 20),
             Expanded(
@@ -55,7 +53,9 @@ class _LoginRegisterPageState extends State<LoginRegisterPage> with SingleTicker
                     child: Card(
                       color: Colors.white,
                       elevation: 4,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(15),
+                      ),
                       child: Padding(
                         padding: const EdgeInsets.all(20),
                         child: Column(
@@ -73,7 +73,11 @@ class _LoginRegisterPageState extends State<LoginRegisterPage> with SingleTicker
                                 hintText: 'Kata Sandi',
                                 border: const OutlineInputBorder(),
                                 suffixIcon: IconButton(
-                                  icon: Icon(_hidePassword ? Icons.visibility_off : Icons.visibility),
+                                  icon: Icon(
+                                    _hidePassword
+                                        ? Icons.visibility_off
+                                        : Icons.visibility,
+                                  ),
                                   onPressed: () {
                                     setState(() {
                                       _hidePassword = !_hidePassword;
@@ -99,10 +103,16 @@ class _LoginRegisterPageState extends State<LoginRegisterPage> with SingleTicker
                                 backgroundColor: Colors.red,
                                 minimumSize: const Size.fromHeight(45),
                               ),
-                              child: const Text('Masuk'),
+                              child: const Text(
+                                'Masuk',
+                                style: TextStyle(color: Colors.white),
+                              ),
                             ),
                             const SizedBox(height: 15),
-                            const Text('atau'),
+                            const Text(
+                              'atau',
+                              style: TextStyle(color: Colors.grey),
+                            ),
                             const SizedBox(height: 10),
                             OutlinedButton.icon(
                               onPressed: () {},
@@ -120,7 +130,7 @@ class _LoginRegisterPageState extends State<LoginRegisterPage> with SingleTicker
                                 const SizedBox(width: 5),
                                 GestureDetector(
                                   onTap: () {
-                                    _tabController.animateTo(1); // Pindah ke tab Daftar
+                                    _tabController.animateTo(1);
                                   },
                                   child: const Text(
                                     'Daftar',
@@ -139,7 +149,9 @@ class _LoginRegisterPageState extends State<LoginRegisterPage> with SingleTicker
                     child: Card(
                       color: Colors.white,
                       elevation: 4,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(15),
+                      ),
                       child: Padding(
                         padding: const EdgeInsets.all(20),
                         child: Column(
@@ -164,7 +176,11 @@ class _LoginRegisterPageState extends State<LoginRegisterPage> with SingleTicker
                                 hintText: 'Kata sandi',
                                 border: const OutlineInputBorder(),
                                 suffixIcon: IconButton(
-                                  icon: Icon(_hidePassword ? Icons.visibility_off : Icons.visibility),
+                                  icon: Icon(
+                                    _hidePassword
+                                        ? Icons.visibility_off
+                                        : Icons.visibility,
+                                  ),
                                   onPressed: () {
                                     setState(() {
                                       _hidePassword = !_hidePassword;
@@ -180,10 +196,15 @@ class _LoginRegisterPageState extends State<LoginRegisterPage> with SingleTicker
                                 hintText: 'Konfirmasi kata sandi',
                                 border: const OutlineInputBorder(),
                                 suffixIcon: IconButton(
-                                  icon: Icon(_hideConfirmPassword ? Icons.visibility_off : Icons.visibility),
+                                  icon: Icon(
+                                    _hideConfirmPassword
+                                        ? Icons.visibility_off
+                                        : Icons.visibility,
+                                  ),
                                   onPressed: () {
                                     setState(() {
-                                      _hideConfirmPassword = !_hideConfirmPassword;
+                                      _hideConfirmPassword =
+                                          !_hideConfirmPassword;
                                     });
                                   },
                                 ),
@@ -196,7 +217,10 @@ class _LoginRegisterPageState extends State<LoginRegisterPage> with SingleTicker
                                 backgroundColor: Colors.red,
                                 minimumSize: const Size.fromHeight(45),
                               ),
-                              child: const Text('Daftar'),
+                              child: const Text(
+                                'Daftar',
+                                style: TextStyle(color: Colors.white),
+                              ),
                             ),
                             const SizedBox(height: 15),
                             Row(
@@ -206,7 +230,9 @@ class _LoginRegisterPageState extends State<LoginRegisterPage> with SingleTicker
                                 const SizedBox(width: 5),
                                 GestureDetector(
                                   onTap: () {
-                                    _tabController.animateTo(0); // Pindah ke tab Masuk
+                                    _tabController.animateTo(
+                                      0,
+                                    ); // Pindah ke tab Masuk
                                   },
                                   child: const Text(
                                     'Masuk disini',
