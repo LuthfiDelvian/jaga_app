@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "997125753161",
+    "project_id": "jaga-app-40db8",
+    "storage_bucket": "jaga-app-40db8.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:997125753161:android:7e41032de1e261c03d7298",
+        "android_client_info": {
+          "package_name": "com.example.jaga_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC7C6qe9W86MIN8ChYvW2bz1ubvxPy2m2M"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
