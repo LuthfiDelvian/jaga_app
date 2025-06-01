@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
 class FormPage extends StatefulWidget {
@@ -12,9 +13,81 @@ class _FormPageState extends State<FormPage> {
   int _selectedIndex = 0;
   final List<String> _kategori = ['PENGADUAN', 'ASPIRASI', 'PENYUAPAN'];
 
+  final TextEditingController _judulController = TextEditingController();
+  final TextEditingController _isiController = TextEditingController();
+  final TextEditingController _tanggalController = TextEditingController();
+  final TextEditingController _lokasiController = TextEditingController();
+  final TextEditingController _instansiController = TextEditingController();
+
   void _pickImage() {
-    // Simulasi aksi pilih gambar
     print("Pilih gambar diklik");
+  }
+
+  String _generateTrackingId() {
+    return "JAGA-${DateTime.now().millisecondsSinceEpoch}";
+  }
+
+  Future<void> _submitLaporan() async {
+    final judul = _judulController.text;
+    final isi = _isiController.text;
+    final tanggal = _tanggalController.text;
+    final lokasi = _lokasiController.text;
+    final instansi = _instansiController.text;
+    final kategori = _kategori[_selectedIndex];
+    final trackingId = _generateTrackingId(); // Ini akan jadi document ID
+
+    if (judul.isEmpty ||
+        isi.isEmpty ||
+        tanggal.isEmpty ||
+        lokasi.isEmpty ||
+        instansi.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Mohon lengkapi semua data laporan')),
+      );
+      return;
+    }
+
+    final laporan = {
+      'judul': judul,
+      'isi': isi,
+      'tanggal': tanggal,
+      'lokasi': lokasi,
+      'instansi': instansi,
+      'kategori': kategori,
+      'isAnonim': _isAnonim,
+      'status': 'Menunggu',
+      'createdAt': Timestamp.now(),
+    };
+
+    try {
+      // Simpan dokumen dengan trackingId sebagai document ID
+      await FirebaseFirestore.instance
+          .collection('laporan')
+          .doc(trackingId)
+          .set(laporan);
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Laporan berhasil dikirim.\nTracking ID: $trackingId'),
+        ),
+      );
+
+      _judulController.clear();
+      _isiController.clear();
+      _tanggalController.clear();
+      _lokasiController.clear();
+      _instansiController.clear();
+
+      setState(() {
+        _isAnonim = false;
+        _selectedIndex = 0;
+      });
+    } catch (e) {
+      print(e);
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Gagal mengirim laporan')));
+    }
   }
 
   @override
@@ -28,7 +101,11 @@ class _FormPageState extends State<FormPage> {
             color: Colors.white,
             borderRadius: BorderRadius.circular(12),
             boxShadow: [
-              BoxShadow(color: Colors.black12, blurRadius: 8, offset: Offset(0, 4)),
+              BoxShadow(
+                color: Colors.black12,
+                blurRadius: 8,
+                offset: Offset(0, 4),
+              ),
             ],
           ),
           child: Column(
@@ -40,7 +117,11 @@ class _FormPageState extends State<FormPage> {
                 color: Colors.red,
                 child: const Text(
                   "Sampaikan Laporan Anda",
-                  style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
               const SizedBox(height: 16),
@@ -54,8 +135,9 @@ class _FormPageState extends State<FormPage> {
                   return Expanded(
                     child: Container(
                       margin: EdgeInsets.only(
-                          left: index == 0 ? 0 : 4,
-                          right: index == _kategori.length - 1 ? 0 : 4),
+                        left: index == 0 ? 0 : 4,
+                        right: index == _kategori.length - 1 ? 0 : 4,
+                      ),
                       child: TextButton(
                         onPressed: () {
                           setState(() {
@@ -64,7 +146,9 @@ class _FormPageState extends State<FormPage> {
                         },
                         style: TextButton.styleFrom(
                           backgroundColor:
-                              _selectedIndex == index ? Colors.red : Colors.white,
+                              _selectedIndex == index
+                                  ? Colors.red
+                                  : Colors.white,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(4),
                             side: const BorderSide(color: Colors.red),
@@ -73,7 +157,10 @@ class _FormPageState extends State<FormPage> {
                         child: Text(
                           _kategori[index],
                           style: TextStyle(
-                            color: _selectedIndex == index ? Colors.white : Colors.red,
+                            color:
+                                _selectedIndex == index
+                                    ? Colors.white
+                                    : Colors.red,
                             fontWeight: FontWeight.bold,
                             fontSize: 14,
                           ),
@@ -85,6 +172,7 @@ class _FormPageState extends State<FormPage> {
               ),
               const SizedBox(height: 16),
               TextField(
+                controller: _judulController,
                 decoration: const InputDecoration(
                   hintText: "Ketik judul laporan",
                   border: OutlineInputBorder(),
@@ -92,6 +180,7 @@ class _FormPageState extends State<FormPage> {
               ),
               const SizedBox(height: 12),
               TextField(
+                controller: _isiController,
                 maxLines: 6,
                 decoration: const InputDecoration(
                   hintText: "Ketik isi laporan",
@@ -100,6 +189,7 @@ class _FormPageState extends State<FormPage> {
               ),
               const SizedBox(height: 12),
               TextField(
+                controller: _tanggalController,
                 decoration: const InputDecoration(
                   hintText: "Pilih tanggal kejadian",
                   border: OutlineInputBorder(),
@@ -107,6 +197,7 @@ class _FormPageState extends State<FormPage> {
               ),
               const SizedBox(height: 12),
               TextField(
+                controller: _lokasiController,
                 decoration: const InputDecoration(
                   hintText: "Ketik lokasi kejadian",
                   border: OutlineInputBorder(),
@@ -114,6 +205,7 @@ class _FormPageState extends State<FormPage> {
               ),
               const SizedBox(height: 12),
               TextField(
+                controller: _instansiController,
                 decoration: const InputDecoration(
                   hintText: "Ketik instansi tujuan",
                   border: OutlineInputBorder(),
@@ -127,9 +219,15 @@ class _FormPageState extends State<FormPage> {
                     onTap: _pickImage,
                     child: Row(
                       children: const [
-                        Icon(Icons.insert_drive_file_outlined, color: Colors.lightBlue),
+                        Icon(
+                          Icons.insert_drive_file_outlined,
+                          color: Colors.lightBlue,
+                        ),
                         SizedBox(width: 4),
-                        Text('Upload Bukti (opsional)', style: TextStyle(fontWeight: FontWeight.w500)),
+                        Text(
+                          'Upload Bukti (opsional)',
+                          style: TextStyle(fontWeight: FontWeight.w500),
+                        ),
                       ],
                     ),
                   ),
@@ -150,15 +248,19 @@ class _FormPageState extends State<FormPage> {
                   ElevatedButton(
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.red,
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 10,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
                     ),
-                    onPressed: () {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Laporan berhasil dikirim')),
-                      );
-                    },
-                    child: const Text('KIRIM', style: TextStyle(color: Colors.white)),
+                    onPressed: _submitLaporan,
+                    child: const Text(
+                      'KIRIM',
+                      style: TextStyle(color: Colors.white),
+                    ),
                   ),
                 ],
               ),
