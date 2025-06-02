@@ -67,7 +67,7 @@ class StatusCard extends StatelessWidget {
           ),
           TextButton(
             onPressed: () {},
-            child: const Text('unduh', style: TextStyle(color: Colors.blue)),
+            child: const Text('Details', style: TextStyle(color: Colors.blue)),
           ),
         ],
       ),

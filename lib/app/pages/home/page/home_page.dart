@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:jaga_app/app/pages/home/widgets/custom_home_app_bar.dart';
 import '../widgets/home_menu_grid.dart';
@@ -20,7 +21,10 @@ class HomePage extends StatelessWidget {
             automaticallyImplyLeading: false,
             flexibleSpace: SafeArea(
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 8,
+                ),
                 child: CustomHomeAppBar(),
               ),
             ),
@@ -29,35 +33,92 @@ class HomePage extends StatelessWidget {
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 10.0),
               child: Column(
-                children: const [
-                  HomeMenuGrid(),
-                  SizedBox(height: 20),
-                  HomeSearchAndTracking(),
-                  SizedBox(height: 20),
-                  StatusCard(
-                    title: 'Pengaduan',
-                    date: '21 April 2025',
-                    status: 'Selesai',
-                    statusColor: Colors.green,
-                  ),
-                  StatusCard(
-                    title: 'Penyusupan',
-                    date: '21 April 2025',
-                    status: 'Ditolak',
-                    statusColor: Colors.red,
-                  ),
-                  StatusCard(
-                    title: 'Aspirasi',
-                    date: '21 April 2025',
-                    status: 'Diproses',
-                    statusColor: Colors.orange,
+                children: [
+                  const HomeMenuGrid(),
+                  const SizedBox(height: 20),
+                  const HomeSearchAndTracking(),
+                  const SizedBox(height: 20),
+
+                  StreamBuilder<QuerySnapshot>(
+                    stream:
+                        FirebaseFirestore.instance
+                            .collection('laporan')
+                            .orderBy('createdAt', descending: true)
+                            .snapshots(),
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return const CircularProgressIndicator();
+                      }
+
+                      if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                        return const Text('Belum ada laporan');
+                      }
+
+                      final laporanDocs = snapshot.data!.docs;
+
+                      return Column(
+                        children:
+                            laporanDocs.map((doc) {
+                              final data = doc.data() as Map<String, dynamic>;
+
+                              final String title =
+                                  data['judul'] ?? 'Tidak ada judul';
+                              final Timestamp ts =
+                                  data['createdAt'] ?? Timestamp.now();
+                              final String status =
+                                  data['status'] ?? 'Tidak diketahui';
+
+                              final DateTime date = ts.toDate();
+                              final statusColor = _getStatusColor(status);
+
+                              return StatusCard(
+                                title: title,
+                                date:
+                                    '${date.day} ${_bulan(date.month)} ${date.year}',
+                                status: status,
+                                statusColor: statusColor,
+                              );
+                            }).toList(),
+                      );
+                    },
                   ),
                 ],
               ),
             ),
-          )
+          ),
         ],
       ),
     );
   }
+}
+
+Color _getStatusColor(String status) {
+  switch (status.toLowerCase()) {
+    case 'diproses':
+      return Colors.orange;
+    case 'ditolak':
+      return Colors.red;
+    case 'selesai':
+      return Colors.green;
+    default:
+      return Colors.grey;
+  }
+}
+
+String _bulan(int bulan) {
+  const bulanMap = [
+    "Januari",
+    "Februari",
+    "Maret",
+    "April",
+    "Mei",
+    "Juni",
+    "Juli",
+    "Agustus",
+    "September",
+    "Oktober",
+    "November",
+    "Desember",
+  ];
+  return bulanMap[bulan - 1];
 }
