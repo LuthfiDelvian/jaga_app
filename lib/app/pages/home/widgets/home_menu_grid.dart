@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:jaga_app/app/pages/articles/page/articles_page.dart';
-import 'package:jaga_app/app/pages/guide_page.dart';
-import 'package:jaga_app/app/pages/help_page.dart';
+import 'package:jaga_app/app/pages/home/page/guide_page.dart';
+import 'package:jaga_app/app/pages/home/page/help_page.dart';
 import 'package:jaga_app/app/pages/report/form_page.dart';
 
 class HomeMenuGrid extends StatelessWidget {

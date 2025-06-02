@@ -22,7 +22,7 @@ class MorePage extends StatelessWidget {
               const SizedBox(height: 16),
               const Text(
                 'MORE',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                style: TextStyle(fontSize: 20),
               ),
               const SizedBox(height: 32),
               Row(

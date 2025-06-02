@@ -1,11 +1,12 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class FormPage extends StatefulWidget {
   const FormPage({super.key});
 
   @override
-  _FormPageState createState() => _FormPageState();
+  State<FormPage> createState() => _FormPageState();
 }
 
 class _FormPageState extends State<FormPage> {
@@ -13,18 +14,18 @@ class _FormPageState extends State<FormPage> {
   int _selectedIndex = 0;
   final List<String> _kategori = ['PENGADUAN', 'ASPIRASI', 'PENYUAPAN'];
 
-  final TextEditingController _judulController = TextEditingController();
-  final TextEditingController _isiController = TextEditingController();
-  final TextEditingController _tanggalController = TextEditingController();
-  final TextEditingController _lokasiController = TextEditingController();
-  final TextEditingController _instansiController = TextEditingController();
-
-  void _pickImage() {
-    print("Pilih gambar diklik");
-  }
+  final _judulController = TextEditingController();
+  final _isiController = TextEditingController();
+  final _tanggalController = TextEditingController();
+  final _lokasiController = TextEditingController();
+  final _instansiController = TextEditingController();
 
   String _generateTrackingId() {
     return "JAGA-${DateTime.now().millisecondsSinceEpoch}";
+  }
+
+  void _pickImage() {
+    print("Pilih gambar diklik");
   }
 
   Future<void> _submitLaporan() async {
@@ -34,13 +35,9 @@ class _FormPageState extends State<FormPage> {
     final lokasi = _lokasiController.text;
     final instansi = _instansiController.text;
     final kategori = _kategori[_selectedIndex];
-    final trackingId = _generateTrackingId(); // Ini akan jadi document ID
+    final trackingId = _generateTrackingId();
 
-    if (judul.isEmpty ||
-        isi.isEmpty ||
-        tanggal.isEmpty ||
-        lokasi.isEmpty ||
-        instansi.isEmpty) {
+    if ([judul, isi, tanggal, lokasi, instansi].any((e) => e.isEmpty)) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Mohon lengkapi semua data laporan')),
       );
@@ -60,7 +57,6 @@ class _FormPageState extends State<FormPage> {
     };
 
     try {
-      // Simpan dokumen dengan trackingId sebagai document ID
       await FirebaseFirestore.instance
           .collection('laporan')
           .doc(trackingId)
@@ -68,7 +64,7 @@ class _FormPageState extends State<FormPage> {
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Laporan berhasil dikirim.\nTracking ID: $trackingId'),
+          content: Text('Laporan berhasil dikirim\nTracking ID: $trackingId'),
         ),
       );
 
@@ -92,181 +88,224 @@ class _FormPageState extends State<FormPage> {
 
   @override
   Widget build(BuildContext context) {
+    // Ubah status bar ke light agar kontras dengan background
+    SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle.light);
+
     return Scaffold(
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Container(
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(12),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black12,
-                blurRadius: 8,
-                offset: Offset(0, 4),
-              ),
-            ],
+      body: Stack(
+        children: [
+          // Background image
+          Positioned.fill(
+            child: Image.asset(
+              'assets/images/background.jpeg',
+              fit: BoxFit.cover,
+            ),
           ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(12),
-                color: Colors.red,
-                child: const Text(
-                  "Sampaikan Laporan Anda",
+          // Scrollable content including SliverAppBar
+          CustomScrollView(
+            slivers: [
+              SliverAppBar(
+                elevation: 0,
+                pinned: false,
+                floating: false,
+                snap: false,
+                backgroundColor: Colors.transparent,
+                expandedHeight: 56,
+                centerTitle: true,
+                title: const Text(
+                  'FORMULIR LAPORAN',
                   style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
+                    color: Colors.black,
+                    fontSize: 20,
                   ),
                 ),
               ),
-              const SizedBox(height: 16),
-              const Text(
-                "Klasifikasi Laporan",
-                style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
-              ),
-              const SizedBox(height: 8),
-              Row(
-                children: List.generate(_kategori.length, (index) {
-                  return Expanded(
-                    child: Container(
-                      margin: EdgeInsets.only(
-                        left: index == 0 ? 0 : 4,
-                        right: index == _kategori.length - 1 ? 0 : 4,
-                      ),
-                      child: TextButton(
-                        onPressed: () {
-                          setState(() {
-                            _selectedIndex = index;
-                          });
-                        },
-                        style: TextButton.styleFrom(
-                          backgroundColor:
-                              _selectedIndex == index
-                                  ? Colors.red
-                                  : Colors.white,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(4),
-                            side: const BorderSide(color: Colors.red),
-                          ),
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.9),
+                      borderRadius: BorderRadius.circular(12),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black12,
+                          blurRadius: 8,
+                          offset: const Offset(0, 4),
                         ),
-                        child: Text(
-                          _kategori[index],
-                          style: TextStyle(
-                            color:
-                                _selectedIndex == index
-                                    ? Colors.white
-                                    : Colors.red,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 14,
-                          ),
-                        ),
-                      ),
+                      ],
                     ),
-                  );
-                }),
-              ),
-              const SizedBox(height: 16),
-              TextField(
-                controller: _judulController,
-                decoration: const InputDecoration(
-                  hintText: "Ketik judul laporan",
-                  border: OutlineInputBorder(),
-                ),
-              ),
-              const SizedBox(height: 12),
-              TextField(
-                controller: _isiController,
-                maxLines: 6,
-                decoration: const InputDecoration(
-                  hintText: "Ketik isi laporan",
-                  border: OutlineInputBorder(),
-                ),
-              ),
-              const SizedBox(height: 12),
-              TextField(
-                controller: _tanggalController,
-                decoration: const InputDecoration(
-                  hintText: "Pilih tanggal kejadian",
-                  border: OutlineInputBorder(),
-                ),
-              ),
-              const SizedBox(height: 12),
-              TextField(
-                controller: _lokasiController,
-                decoration: const InputDecoration(
-                  hintText: "Ketik lokasi kejadian",
-                  border: OutlineInputBorder(),
-                ),
-              ),
-              const SizedBox(height: 12),
-              TextField(
-                controller: _instansiController,
-                decoration: const InputDecoration(
-                  hintText: "Ketik instansi tujuan",
-                  border: OutlineInputBorder(),
-                ),
-              ),
-              const SizedBox(height: 16),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  GestureDetector(
-                    onTap: _pickImage,
-                    child: Row(
-                      children: const [
-                        Icon(
-                          Icons.insert_drive_file_outlined,
-                          color: Colors.lightBlue,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.all(12),
+                          color: Colors.red,
+                          child: const Text(
+                            "Sampaikan Laporan Anda",
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
                         ),
-                        SizedBox(width: 4),
-                        Text(
-                          'Upload Bukti (opsional)',
-                          style: TextStyle(fontWeight: FontWeight.w500),
+                        const SizedBox(height: 16),
+                        const Text(
+                          "Klasifikasi Laporan",
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Row(
+                          children: List.generate(_kategori.length, (index) {
+                            return Expanded(
+                              child: Container(
+                                margin: const EdgeInsets.symmetric(
+                                  horizontal: 4,
+                                ),
+                                child: TextButton(
+                                  onPressed: () {
+                                    setState(() {
+                                      _selectedIndex = index;
+                                    });
+                                  },
+                                  style: TextButton.styleFrom(
+                                    backgroundColor:
+                                        _selectedIndex == index
+                                            ? Colors.red
+                                            : Colors.white,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(4),
+                                      side: const BorderSide(color: Colors.red),
+                                    ),
+                                  ),
+                                  child: Text(
+                                    _kategori[index],
+                                    style: TextStyle(
+                                      color:
+                                          _selectedIndex == index
+                                              ? Colors.white
+                                              : Colors.red,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 14,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            );
+                          }),
+                        ),
+                        const SizedBox(height: 16),
+                        _buildTextField(
+                          _judulController,
+                          "Ketik judul laporan",
+                        ),
+                        const SizedBox(height: 12),
+                        _buildTextField(
+                          _isiController,
+                          "Ketik isi laporan",
+                          maxLines: 6,
+                        ),
+                        const SizedBox(height: 12),
+                        _buildTextField(
+                          _tanggalController,
+                          "Pilih tanggal kejadian",
+                        ),
+                        const SizedBox(height: 12),
+                        _buildTextField(
+                          _lokasiController,
+                          "Ketik lokasi kejadian",
+                        ),
+                        const SizedBox(height: 12),
+                        _buildTextField(
+                          _instansiController,
+                          "Ketik instansi tujuan",
+                        ),
+                        const SizedBox(height: 16),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            GestureDetector(
+                              onTap: _pickImage,
+                              child: Row(
+                                children: const [
+                                  Icon(
+                                    Icons.insert_drive_file_outlined,
+                                    color: Colors.lightBlue,
+                                  ),
+                                  SizedBox(width: 4),
+                                  Text(
+                                    'Upload Bukti (opsional)',
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            Row(
+                              children: [
+                                Checkbox(
+                                  value: _isAnonim,
+                                  activeColor: Colors.red,
+                                  onChanged: (val) {
+                                    setState(() {
+                                      _isAnonim = val!;
+                                    });
+                                  },
+                                ),
+                                const Text("Anonim"),
+                              ],
+                            ),
+                            ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.red,
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 16,
+                                  vertical: 10,
+                                ),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                              ),
+                              onPressed: _submitLaporan,
+                              child: const Text(
+                                'KIRIM',
+                                style: TextStyle(color: Colors.white),
+                              ),
+                            ),
+                          ],
                         ),
                       ],
                     ),
                   ),
-                  Row(
-                    children: [
-                      Checkbox(
-                        value: _isAnonim,
-                        activeColor: Colors.red,
-                        onChanged: (val) {
-                          setState(() {
-                            _isAnonim = val!;
-                          });
-                        },
-                      ),
-                      const Text("Anonim"),
-                    ],
-                  ),
-                  ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.red,
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 10,
-                      ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                    ),
-                    onPressed: _submitLaporan,
-                    child: const Text(
-                      'KIRIM',
-                      style: TextStyle(color: Colors.white),
-                    ),
-                  ),
-                ],
+                ),
               ),
             ],
           ),
-        ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTextField(
+    TextEditingController controller,
+    String hintText, {
+    int maxLines = 1,
+  }) {
+    return TextField(
+      controller: controller,
+      maxLines: maxLines,
+      decoration: InputDecoration(
+        hintText: hintText,
+        border: const OutlineInputBorder(),
+        fillColor: Colors.white,
+        filled: true,
       ),
     );
   }

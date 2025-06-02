@@ -7,46 +7,26 @@ class HelpPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () {
+            // Aksi ketika tombol kembali ditekan
+            // Jika halaman ini dibuka melalui Navigator.push,
+            // ini akan kembali ke halaman sebelumnya.
+            if (Navigator.canPop(context)) {
+              Navigator.of(context).pop();
+            }
+            // Jika tidak, Anda mungkin perlu implementasi lain,
+            // misalnya jika ini adalah halaman root.
+          },
+        ),
         title: Text('Bantuan'),
       ),
       body: SafeArea( // Memastikan konten tidak terhalang oleh system UI (status bar, notch)
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Header Kustom
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 12.0),
-              child: Column( // Mengubah Row menjadi Column
-                crossAxisAlignment: CrossAxisAlignment.start, // Agar teks Bantuan rata kiri
-                children: [
-                  IconButton(
-                    icon: const Icon(Icons.chevron_left), // Ikon sesuai gambar
-                    iconSize: 30.0, // Sesuaikan ukuran ikon jika perlu
-                    color: Colors.black87,
-                    onPressed: () {
-                      // Aksi ketika tombol kembali ditekan
-                      if (Navigator.canPop(context)) {
-                        Navigator.of(context).pop();
-                      }
-                    },
-                    // Mengurangi padding default IconButton agar lebih rapat
-                    padding: const EdgeInsets.all(8.0), // Sedikit padding agar area sentuh tidak terlalu kecil
-                    constraints: const BoxConstraints(), // Untuk memungkinkan padding yang lebih kecil
-                  ),
-                  const Padding( // Menambahkan Padding untuk teks "Bantuan"
-                    padding: EdgeInsets.only(left: 16.0, top: 4.0), // Sesuaikan padding sesuai kebutuhan
-                    child: Text(
-                      'Bantuan',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black87,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
+            
             const SizedBox(height: 12.0), // Jarak antara header "Bantuan" dan konten berikutnya
 
             // Konten yang Dapat Di-scroll
