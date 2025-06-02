@@ -50,21 +50,21 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'AIzaSyDrvfVqFzkRFFMPaSHE-Zr8X6kvX_dltq8',
-    appId: '1:997125753161:web:2a27a056f1481ada3d7298',
-    messagingSenderId: '997125753161',
-    projectId: 'jaga-app-40db8',
-    authDomain: 'jaga-app-40db8.firebaseapp.com',
-    storageBucket: 'jaga-app-40db8.firebasestorage.app',
-    measurementId: 'G-N3WFZXC7L4',
+    apiKey: 'AIzaSyCV-cBfMHb-Yb5L2UCO-r0wrR-djP47FZI',
+    appId: '1:934100035583:web:8347aa3b52d733318aa9ca',
+    messagingSenderId: '934100035583',
+    projectId: 'jaga-app-3e0ef',
+    authDomain: 'jaga-app-3e0ef.firebaseapp.com',
+    storageBucket: 'jaga-app-3e0ef.firebasestorage.app',
+    measurementId: 'G-RYBGT0GD9L',
   );
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyC7C6qe9W86MIN8ChYvW2bz1ubvxPy2m2M',
-    appId: '1:997125753161:android:7e41032de1e261c03d7298',
-    messagingSenderId: '997125753161',
-    projectId: 'jaga-app-40db8',
-    storageBucket: 'jaga-app-40db8.firebasestorage.app',
+    apiKey: 'AIzaSyA0-nT0ttF7CvwqceqadkBazlIuQI0xG-4',
+    appId: '1:934100035583:android:4af337129ed489208aa9ca',
+    messagingSenderId: '934100035583',
+    projectId: 'jaga-app-3e0ef',
+    storageBucket: 'jaga-app-3e0ef.firebasestorage.app',
   );
 
 }
