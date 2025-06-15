@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import '../widgets/article_card.dart';
 import '../widgets/article_search_bar.dart';
@@ -7,27 +8,6 @@ class ArticlesPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final articles = [
-      {
-        'image': 'assets/images/law.jpg',
-        'title': 'Proyek Fiktif Ditemukan di Lembaga Pendidikan',
-        'description':
-            'BPK menemukan proyek pengadaan alat praktik di sekolah menengah atas dilakukan dengan anggaran besar, namun anggarannya tetap dibekukan dahulu.',
-      },
-      {
-        'image': 'assets/images/law.jpg',
-        'title': 'Korupsi Pertamina',
-        'description':
-            'Kasus dugaan korupsi pengadaan minyak di Pertamina dari tahun anggaran 2018–2023 mendapat perhatian luas setelah mantan CEO dilaporkan ke KPK.',
-      },
-      {
-        'image': 'assets/images/law.jpg',
-        'title': 'KPK Ajak Mahasiswa Jadi Pengawas Integritas',
-        'description':
-            'KPK menggagas program integritas kampus dengan melibatkan mahasiswa sebagai agen perubahan pemberantasan korupsi sejak dini.',
-      },
-    ];
-
     return Scaffold(
       appBar: AppBar(
         title: const Text('Artikel'),
@@ -37,16 +17,48 @@ class ArticlesPage extends StatelessWidget {
       ),
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 10.0),
-        child: SingleChildScrollView(
-          child: Column(
-            children: [
-              const SizedBox(height: 10),
-              const ArticleSearchBar(),
-              const SizedBox(height: 16),
-              ...articles.map((article) => ArticleCard(article: article)).toList(),
-              const SizedBox(height: 20),
-            ],
-          ),
+        child: Column(
+          children: [
+            const SizedBox(height: 10),
+            const ArticleSearchBar(),
+            const SizedBox(height: 16),
+            Expanded(
+              child: StreamBuilder<QuerySnapshot>(
+                stream: FirebaseFirestore.instance
+                    .collection('artikel')
+                    .orderBy('tanggal', descending: true)
+                    .snapshots(),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+                  if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                    return const Center(child: Text('Belum ada artikel.'));
+                  }
+
+                  final articles = snapshot.data!.docs;
+
+                  return ListView.builder(
+                    itemCount: articles.length,
+                    itemBuilder: (context, index) {
+                      final data = articles[index].data() as Map<String, dynamic>;
+
+                      return ArticleCard(
+                        article: data,
+                        onTap: () {
+                          Navigator.pushNamed(
+                            context,
+                            '/detail',
+                            arguments: data,
+                          );
+                        },
+                      );
+                    },
+                  );
+                },
+              ),
+            ),
+          ],
         ),
       ),
     );

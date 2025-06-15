@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:jaga_app/app/layout/widget_tree.dart';
+import 'package:jaga_app/app/pages/articles/page/article_detail_page.dart';
 import 'package:jaga_app/app/pages/home/page/home_page.dart';
 import 'layout/welcome_page.dart';
 import 'package:jaga_app/core/notifiers/theme_notifier.dart';
@@ -35,6 +36,7 @@ class _MyAppState extends State<MyApp> {
           darkTheme: AppTheme.darkTheme,
           themeMode: isDarkMode ? ThemeMode.dark : ThemeMode.light,
           home: const RootPage(),
+          routes: {'/detail': (context) => const ArticleDetailPage()},
         );
       },
     );
@@ -71,7 +73,9 @@ class _RootPageState extends State<RootPage> {
       stream: FirebaseAuth.instance.authStateChanges(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Scaffold(body: Center(child: CircularProgressIndicator()));
+          return const Scaffold(
+            body: Center(child: CircularProgressIndicator()),
+          );
         }
         final user = snapshot.data;
         if (user == null) {
