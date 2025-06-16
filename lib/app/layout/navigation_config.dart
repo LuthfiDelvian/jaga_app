@@ -8,6 +8,6 @@ import 'package:jaga_app/app/pages/more/pages/more_page.dart';
 final List<Widget> appPages = [
   const HomePage(),
   const ArticlesPage(),
-  const FormPage(),
+  const ReportFormPage(),
   const MorePage(),
 ];

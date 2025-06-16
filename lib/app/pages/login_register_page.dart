@@ -107,7 +107,7 @@ class _LoginRegisterPageState extends State<LoginRegisterPage>
         elevation: 1,
         centerTitle: true,
         iconTheme: const IconThemeData(color: Colors.black),
-        title: Image.asset('assets/images/jaga-icon.png', height: 38),
+        title: Image.asset('assets/images/jaga-icon.png', height: 100),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.black),
           onPressed: () => Navigator.pop(context),
@@ -182,7 +182,7 @@ class _LoginRegisterPageState extends State<LoginRegisterPage>
                             ElevatedButton(
                               onPressed: _loginUser,
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.red.shade300,
+                                backgroundColor: Colors.red,
                                 minimumSize: const Size.fromHeight(45),
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(8),

@@ -22,7 +22,7 @@ class HomeMenuGrid extends StatelessWidget {
           onTap: () {
             Navigator.push(
               context,
-              MaterialPageRoute(builder: (_) => const FormPage()),
+              MaterialPageRoute(builder: (_) => const ReportFormPage()),
             );
           },
         ),

@@ -10,7 +10,11 @@ PreferredSizeWidget? buildCustomAppBar(BuildContext context, int selectedPage) {
     shadowColor: Colors.grey.withOpacity(0.2),
     backgroundColor: Colors.white,
     leading: IconButton(
-      icon: const Icon(Icons.comment, color: Colors.amber),
+      icon: Transform(
+        alignment: Alignment.center,
+        transform: Matrix4.rotationY(3.1416),
+        child: const Icon(Icons.comment, color: Colors.amber),
+      ),
       onPressed: () {
         Navigator.push(
           context,
@@ -18,6 +22,7 @@ PreferredSizeWidget? buildCustomAppBar(BuildContext context, int selectedPage) {
         );
       },
     ),
+
     title: Image.asset('assets/images/jaga-icon.png', height: 100),
     centerTitle: true,
     actions: [
