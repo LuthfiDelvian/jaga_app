@@ -6,7 +6,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:jaga_app/app/pages/report/form_success_page.dart';
+import 'package:jaga_app/app/pages/report/pages/form_success_page.dart';
 
 class ReportFormPage extends StatefulWidget {
   const ReportFormPage({super.key});
