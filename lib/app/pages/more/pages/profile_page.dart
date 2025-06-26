@@ -1,10 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:jaga_app/app/pages/more/widgets/profile_id_card.dart';
+import 'package:jaga_app/app/pages/more/widgets/profile_report_card.dart';
+import 'package:jaga_app/app/pages/more/widgets/profile_settings_card.dart';
+import 'package:jaga_app/app/services/auth_service.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class ProfilePage extends StatelessWidget {
   const ProfilePage({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final user = FirebaseAuth.instance.currentUser;
+    final userId = user?.email?.split('@').first ?? '-';
+
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -22,50 +30,73 @@ class ProfilePage extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // ROW KANAN KIRI TETAP
+            // Bagian atas: ID dan Setting
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Kiri: ID + hapus akun
                 Expanded(
                   child: Column(
                     children: [
-                      // ID Card
-                      Container(
-                        width: double.infinity,
-                        padding: EdgeInsets.symmetric(vertical: 53),
-                        margin: EdgeInsets.only(bottom: 12),
-                        decoration: BoxDecoration(
-                          color: Colors.red,
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        alignment: Alignment.center,
-                        child: Text(
-                          'jgA2948K',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            letterSpacing: 1,
-                          ),
-                        ),
+                      ProfileIDCard(id: userId),
+                      const SizedBox(height: 12),
+                      ProfileSettingCard(
+                        label: 'Hapus akun',
+                        onTap: () async {
+                          final confirm = await showDialog<bool>(
+                            context: context,
+                            builder:
+                                (context) => AlertDialog(
+                                  title: const Text('Konfirmasi'),
+                                  content: const Text(
+                                    'Yakin ingin menghapus akun?',
+                                  ),
+                                  actions: [
+                                    TextButton(
+                                      onPressed:
+                                          () => Navigator.pop(context, false),
+                                      child: const Text('Batal'),
+                                    ),
+                                    TextButton(
+                                      onPressed:
+                                          () => Navigator.pop(context, true),
+                                      child: const Text('Hapus'),
+                                    ),
+                                  ],
+                                ),
+                          );
+
+                          if (confirm == true) {
+                            try {
+                              await UserAuthService().deleteAccount();
+
+                              // Redirect ke halaman awal
+                              Navigator.of(context).pushReplacementNamed('/');
+                            } on FirebaseAuthException catch (e) {
+                              // Handle error jika delete gagal (contoh: perlu re-authentication)
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(
+                                    'Gagal menghapus akun: ${e.message}',
+                                  ),
+                                ),
+                              );
+                            }
+                          }
+                        },
                       ),
-                      // Tombol hapus akun
-                      _settingButton(context, 'Hapus akun'),
                     ],
                   ),
                 ),
-                SizedBox(width: 12),
-                // Kanan: notifikasi + bahasa + keluar
+                const SizedBox(width: 12),
                 Expanded(
                   child: Column(
                     children: [
                       Container(
-                        padding: EdgeInsets.symmetric(
+                        padding: const EdgeInsets.symmetric(
                           horizontal: 16,
                           vertical: 12,
                         ),
-                        margin: EdgeInsets.only(bottom: 12),
+                        margin: const EdgeInsets.only(bottom: 12),
                         decoration: BoxDecoration(
                           border: Border.all(color: Colors.grey.shade300),
                           borderRadius: BorderRadius.circular(12),
@@ -73,7 +104,7 @@ class ProfilePage extends StatelessWidget {
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Text('Notifikasi'),
+                            const Text('Notifikasi'),
                             Switch(
                               value: true,
                               onChanged: (_) {},
@@ -85,9 +116,50 @@ class ProfilePage extends StatelessWidget {
                           ],
                         ),
                       ),
-                      _settingButton(context, 'Bahasa  Indonesia'),
+                      ProfileSettingCard(label: 'Bahasa Indonesia'),
                       const SizedBox(height: 12),
-                      _settingButton(context, 'Keluar'),
+                      ProfileSettingCard(
+                        label: 'Keluar',
+                        onTap: () async {
+                          final confirm = await showDialog<bool>(
+                            context: context,
+                            builder:
+                                (context) => AlertDialog(
+                                  title: const Text('Konfirmasi'),
+                                  content: const Text('Yakin ingin logout?'),
+                                  actions: [
+                                    TextButton(
+                                      onPressed:
+                                          () => Navigator.pop(context, false),
+                                      child: const Text('Batal'),
+                                    ),
+                                    TextButton(
+                                      onPressed:
+                                          () => Navigator.pop(context, true),
+                                      child: const Text('Keluar'),
+                                    ),
+                                  ],
+                                ),
+                          );
+
+                          if (confirm == true) {
+                            try {
+                              await UserAuthService().signOut();
+
+                              // Tunggu sebentar agar logout benar-benar selesai
+                              await Future.delayed(
+                                const Duration(milliseconds: 200),
+                              );
+
+                              Navigator.of(context).pushReplacementNamed('/');
+                            } catch (e, stackTrace) {
+                              // Cetak error ke debug console
+                              print('Logout error: $e');
+                              print('Stack trace: $stackTrace');
+                            }
+                          }
+                        },
+                      ),
                     ],
                   ),
                 ),
@@ -95,108 +167,22 @@ class ProfilePage extends StatelessWidget {
             ),
 
             const SizedBox(height: 24),
-
-            // Riwayat laporan
-            Text(
+            const Text(
               'Riwayat Laporan',
               style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 12),
-            _reportCard(
+
+            // Riwayat laporan dummy
+            const ProfileReportCard(
               title: 'Penyalahgunaan Anggaran',
               subtitle: 'Laporan sedang diverifikasi',
               date: '12 Apr 2024  10:25 AM',
               status: 'Diterima',
               statusColor: Colors.green,
             ),
-            _reportCard(
-              title: 'Dugaan Penyalahgunaan Dana Kegiatan Sosial',
-              subtitle: 'Laporan sedang diproses',
-              date: '22 Mei 2024  10:25 AM',
-              status: 'Diterima',
-              statusColor: Colors.green,
-            ),
-            _reportCard(
-              title: 'Penyalahgunaan Anggaran',
-              subtitle: 'Laporan dibatalkan',
-              date: '12 Apr 2024  10:25 AM',
-              status: 'Dibatalkan',
-              statusColor: Colors.red,
-            ),
           ],
         ),
-      ),
-    );
-  }
-
-  Widget _settingButton(BuildContext context, String label) {
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-      width: double.infinity,
-      decoration: BoxDecoration(
-        border: Border.all(color: Colors.grey.shade300),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [Text(label), Icon(Icons.chevron_right)],
-      ),
-    );
-  }
-
-  Widget _reportCard({
-    required String title,
-    required String subtitle,
-    required String date,
-    required String status,
-    required Color statusColor,
-  }) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        border: Border.all(color: Colors.grey.shade300),
-        borderRadius: BorderRadius.circular(12),
-        color: Colors.white,
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Expanded(
-                child: Text(
-                  title,
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
-              ),
-              Icon(Icons.chevron_right),
-            ],
-          ),
-          const SizedBox(height: 4),
-          Text(subtitle),
-          const SizedBox(height: 6),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(date, style: TextStyle(fontSize: 13, color: Colors.grey)),
-              Row(
-                children: [
-                  Icon(Icons.check_circle, size: 16, color: statusColor),
-                  const SizedBox(width: 4),
-                  Text(
-                    status,
-                    style: TextStyle(
-                      fontSize: 13,
-                      color: statusColor,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ],
       ),
     );
   }

@@ -1,1 +1,35 @@
-{"flutter":{"platforms":{"android":{"default":{"projectId":"jaga-app-3e0ef","appId":"1:934100035583:android:4af337129ed489208aa9ca","fileOutput":"android/app/google-services.json"}},"dart":{"lib/firebase_options.dart":{"projectId":"jaga-app-3e0ef","configurations":{"android":"1:934100035583:android:4af337129ed489208aa9ca","web":"1:934100035583:web:8347aa3b52d733318aa9ca"}}}}}}
+{
+  "flutter": {
+    "platforms": {
+      "android": {
+        "default": {
+          "projectId": "jaga-app-3e0ef",
+          "appId": "1:934100035583:android:4af337129ed489208aa9ca",
+          "fileOutput": "android/app/google-services.json"
+        }
+      },
+      "dart": {
+        "lib/firebase_options.dart": {
+          "projectId": "jaga-app-3e0ef",
+          "configurations": {
+            "android": "1:934100035583:android:4af337129ed489208aa9ca",
+            "web": "1:934100035583:web:8347aa3b52d733318aa9ca"
+          }
+        }
+      }
+    }
+  },
+  "functions": [
+    {
+      "source": "functions",
+      "codebase": "default",
+      "ignore": [
+        "node_modules",
+        ".git",
+        "firebase-debug.log",
+        "firebase-debug.*.log",
+        "*.local"
+      ]
+    }
+  ]
+}
