@@ -7,6 +7,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:jaga_app/app/pages/report/pages/form_success_page.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class ReportFormPage extends StatefulWidget {
   const ReportFormPage({super.key});
@@ -90,6 +91,7 @@ class _ReportFormPageState extends State<ReportFormPage> {
     final isi = _isiController.text.trim();
     final lokasi = _lokasiController.text.trim();
     final tanggal = _tanggalController.text.trim();
+    final uid = FirebaseAuth.instance.currentUser?.uid;
 
     if (judul.isEmpty ||
         isi.isEmpty ||
@@ -115,6 +117,7 @@ class _ReportFormPageState extends State<ReportFormPage> {
     final data = {
       'id': reportId,
       'judul': judul,
+      'uid' : uid,
       'isi': isi,
       'lokasi': lokasi,
       'tanggal': tanggal,

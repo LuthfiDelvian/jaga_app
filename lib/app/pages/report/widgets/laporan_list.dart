@@ -3,14 +3,15 @@ import 'package:flutter/material.dart';
 import 'laporan_status_card.dart';
 
 class LaporanList extends StatelessWidget {
-  const LaporanList({super.key});
+  final String uid;
+  const LaporanList({super.key, required this.uid});
 
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<QuerySnapshot>(
       stream: FirebaseFirestore.instance
           .collection('laporan')
-          .orderBy('createdAt', descending: true)
+          .where('uid', isEqualTo: uid)
           .snapshots(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
@@ -18,7 +19,7 @@ class LaporanList extends StatelessWidget {
         }
 
         if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-          return const Text('Belum ada laporan');
+          return Text('Belum ada laporan untuk UID: $uid');
         }
 
         final laporanDocs = snapshot.data!.docs;

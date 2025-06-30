@@ -31,7 +31,7 @@ class HomePage extends StatelessWidget {
                       const SizedBox(height: 20),
                       const HomeSearchAndTracking(),
                       const SizedBox(height: 20),
-                      const LaporanList(),
+                      if (user != null) LaporanList(uid: user.uid),
                     ],
                   ),
                 ),

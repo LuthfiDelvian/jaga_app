@@ -1,12 +1,27 @@
 import 'package:flutter/material.dart';
-import 'package:jaga_app/app/pages/more/widgets/profile_id_card.dart';
-import 'package:jaga_app/app/pages/more/widgets/profile_report_card.dart';
-import 'package:jaga_app/app/pages/more/widgets/profile_settings_card.dart';
+import 'package:jaga_app/app/pages/profile/widgets/profile_id_card.dart';
+import 'package:jaga_app/app/pages/profile/widgets/profile_report_card.dart';
+import 'package:jaga_app/app/pages/profile/widgets/profile_setting_card.dart';
 import 'package:jaga_app/app/services/auth_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:intl/intl.dart';
 
 class ProfilePage extends StatelessWidget {
   const ProfilePage({super.key});
+
+  Color getStatusColor(String status) {
+    switch (status.toLowerCase()) {
+      case 'diterima':
+        return Colors.green;
+      case 'diproses':
+        return Colors.orange;
+      case 'menunggu':
+        return Colors.grey;
+      default:
+        return Colors.blueGrey;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -44,40 +59,30 @@ class ProfilePage extends StatelessWidget {
                         onTap: () async {
                           final confirm = await showDialog<bool>(
                             context: context,
-                            builder:
-                                (context) => AlertDialog(
-                                  title: const Text('Konfirmasi'),
-                                  content: const Text(
-                                    'Yakin ingin menghapus akun?',
-                                  ),
-                                  actions: [
-                                    TextButton(
-                                      onPressed:
-                                          () => Navigator.pop(context, false),
-                                      child: const Text('Batal'),
-                                    ),
-                                    TextButton(
-                                      onPressed:
-                                          () => Navigator.pop(context, true),
-                                      child: const Text('Hapus'),
-                                    ),
-                                  ],
+                            builder: (context) => AlertDialog(
+                              title: const Text('Konfirmasi'),
+                              content: const Text('Yakin ingin menghapus akun?'),
+                              actions: [
+                                TextButton(
+                                  onPressed: () => Navigator.pop(context, false),
+                                  child: const Text('Batal'),
                                 ),
+                                TextButton(
+                                  onPressed: () => Navigator.pop(context, true),
+                                  child: const Text('Hapus'),
+                                ),
+                              ],
+                            ),
                           );
 
                           if (confirm == true) {
                             try {
                               await UserAuthService().deleteAccount();
-
-                              // Redirect ke halaman awal
                               Navigator.of(context).pushReplacementNamed('/');
                             } on FirebaseAuthException catch (e) {
-                              // Handle error jika delete gagal (contoh: perlu re-authentication)
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(
-                                  content: Text(
-                                    'Gagal menghapus akun: ${e.message}',
-                                  ),
+                                  content: Text('Gagal menghapus akun: ${e.message}'),
                                 ),
                               );
                             }
@@ -92,10 +97,7 @@ class ProfilePage extends StatelessWidget {
                   child: Column(
                     children: [
                       Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 12,
-                        ),
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                         margin: const EdgeInsets.only(bottom: 12),
                         decoration: BoxDecoration(
                           border: Border.all(color: Colors.grey.shade300),
@@ -123,37 +125,28 @@ class ProfilePage extends StatelessWidget {
                         onTap: () async {
                           final confirm = await showDialog<bool>(
                             context: context,
-                            builder:
-                                (context) => AlertDialog(
-                                  title: const Text('Konfirmasi'),
-                                  content: const Text('Yakin ingin logout?'),
-                                  actions: [
-                                    TextButton(
-                                      onPressed:
-                                          () => Navigator.pop(context, false),
-                                      child: const Text('Batal'),
-                                    ),
-                                    TextButton(
-                                      onPressed:
-                                          () => Navigator.pop(context, true),
-                                      child: const Text('Keluar'),
-                                    ),
-                                  ],
+                            builder: (context) => AlertDialog(
+                              title: const Text('Konfirmasi'),
+                              content: const Text('Yakin ingin logout?'),
+                              actions: [
+                                TextButton(
+                                  onPressed: () => Navigator.pop(context, false),
+                                  child: const Text('Batal'),
                                 ),
+                                TextButton(
+                                  onPressed: () => Navigator.pop(context, true),
+                                  child: const Text('Keluar'),
+                                ),
+                              ],
+                            ),
                           );
 
                           if (confirm == true) {
                             try {
                               await UserAuthService().signOut();
-
-                              // Tunggu sebentar agar logout benar-benar selesai
-                              await Future.delayed(
-                                const Duration(milliseconds: 200),
-                              );
-
+                              await Future.delayed(const Duration(milliseconds: 200));
                               Navigator.of(context).pushReplacementNamed('/');
                             } catch (e, stackTrace) {
-                              // Cetak error ke debug console
                               print('Logout error: $e');
                               print('Stack trace: $stackTrace');
                             }
@@ -173,13 +166,44 @@ class ProfilePage extends StatelessWidget {
             ),
             const SizedBox(height: 12),
 
-            // Riwayat laporan dummy
-            const ProfileReportCard(
-              title: 'Penyalahgunaan Anggaran',
-              subtitle: 'Laporan sedang diverifikasi',
-              date: '12 Apr 2024  10:25 AM',
-              status: 'Diterima',
-              statusColor: Colors.green,
+            StreamBuilder<QuerySnapshot>(
+              stream: FirebaseFirestore.instance
+                  .collection('laporan')
+                  .where('uid', isEqualTo: user?.uid)
+                  .snapshots(),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+
+                if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                  return const Text('Belum ada laporan.');
+                }
+
+                final reports = snapshot.data!.docs;
+
+                return Column(
+                  children: reports.map((doc) {
+                    final data = doc.data() as Map<String, dynamic>;
+
+                    final title = data['judul'] ?? 'Tanpa Judul';
+                    final createdAt = (data['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now();
+                    final status = data['status'] ?? 'Menunggu';
+                    final subtitle = data['subtitle'] ?? 'Laporan sedang $status';
+
+                    final formattedDate = DateFormat('dd MMM yyyy  hh:mm a').format(createdAt);
+                    final statusColor = getStatusColor(status);
+
+                    return ProfileReportCard(
+                      title: title,
+                      subtitle: subtitle,
+                      date: formattedDate,
+                      status: status,
+                      statusColor: statusColor,
+                    );
+                  }).toList(),
+                );
+              },
             ),
           ],
         ),
