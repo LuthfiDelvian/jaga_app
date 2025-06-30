@@ -6,6 +6,7 @@ class ProfileReportCard extends StatelessWidget {
   final String date;
   final String status;
   final Color statusColor;
+  final VoidCallback? onTap;
 
   const ProfileReportCard({
     super.key,
@@ -14,6 +15,7 @@ class ProfileReportCard extends StatelessWidget {
     required this.date,
     required this.status,
     required this.statusColor,
+    required this.onTap,
   });
 
   @override
@@ -32,18 +34,28 @@ class ProfileReportCard extends StatelessWidget {
           Row(
             children: [
               Expanded(
-                child: Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
+                child: Text(
+                  title,
+                  style: const TextStyle(fontWeight: FontWeight.bold),
+                ),
               ),
-              const Icon(Icons.chevron_right),
+              GestureDetector(
+                onTap: onTap, // 👈 Aksi ke detail page
+                child: const Icon(Icons.chevron_right),
+              ),
             ],
           ),
+
           const SizedBox(height: 4),
           Text(subtitle),
           const SizedBox(height: 6),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(date, style: const TextStyle(fontSize: 13, color: Colors.grey)),
+              Text(
+                date,
+                style: const TextStyle(fontSize: 13, color: Colors.grey),
+              ),
               Row(
                 children: [
                   Icon(Icons.check_circle, size: 16, color: statusColor),

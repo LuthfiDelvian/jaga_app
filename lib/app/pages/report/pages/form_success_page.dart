@@ -1,9 +1,12 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:jaga_app/app/pages/articles/widgets/mini_article_card.dart';
+import 'package:jaga_app/app/pages/report/pages/report_detail_page.dart';
 
 class ReportSuccessPage extends StatelessWidget {
-  const ReportSuccessPage({super.key});
+  final String reportId;
+
+  const ReportSuccessPage({super.key, required this.reportId});
 
   @override
   Widget build(BuildContext context) {
@@ -27,15 +30,15 @@ class ReportSuccessPage extends StatelessWidget {
                 children: [
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
+                    children: const [
                       Icon(Icons.error, color: Colors.white, size: 36),
+                      SizedBox(width: 8),
                       Text(
                         'Laporan Terkirim',
                         style: TextStyle(fontSize: 18, color: Colors.white),
                       ),
                     ],
                   ),
-
                   const SizedBox(height: 6),
                   const Text(
                     'Lihat Laporan Saya untuk informasi lebih lanjut',
@@ -48,11 +51,9 @@ class ReportSuccessPage extends StatelessWidget {
                       Expanded(
                         child: OutlinedButton(
                           onPressed: () {
-                            Navigator.of(
-                              context,
-                            ).pushNamedAndRemoveUntil('/', (route) => false);
+                            Navigator.of(context)
+                                .pushNamedAndRemoveUntil('/', (route) => false);
                           },
-
                           style: OutlinedButton.styleFrom(
                             backgroundColor: Colors.red,
                             side: const BorderSide(color: Colors.white),
@@ -73,13 +74,17 @@ class ReportSuccessPage extends StatelessWidget {
                       const SizedBox(width: 12),
                       Expanded(
                         child: OutlinedButton(
-                          onPressed:
-                              () => Navigator.of(
-                                context,
-                              ).pushNamed('/laporan-saya'),
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => ReportDetailPage(documentId: reportId),
+                              ),
+                            );
+                          },
                           style: OutlinedButton.styleFrom(
-                            side: const BorderSide(color: Colors.white),
                             backgroundColor: Colors.red,
+                            side: const BorderSide(color: Colors.white),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(8),
                             ),
@@ -99,7 +104,6 @@ class ReportSuccessPage extends StatelessWidget {
                 ],
               ),
             ),
-
             const SizedBox(height: 30),
             const Divider(thickness: 1),
             const Padding(
@@ -113,13 +117,12 @@ class ReportSuccessPage extends StatelessWidget {
               ),
             ),
             FutureBuilder<QuerySnapshot>(
-              future:
-                  FirebaseFirestore.instance
-                      .collection('artikel')
-                      .where('status', isEqualTo: 'terbit')
-                      .orderBy('tanggal', descending: true)
-                      .limit(4)
-                      .get(),
+              future: FirebaseFirestore.instance
+                  .collection('artikel')
+                  .where('status', isEqualTo: 'terbit')
+                  .orderBy('tanggal', descending: true)
+                  .limit(4)
+                  .get(),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const Padding(
@@ -131,7 +134,7 @@ class ReportSuccessPage extends StatelessWidget {
                 if (snapshot.hasError) {
                   return Padding(
                     padding: const EdgeInsets.all(16.0),
-                    child: Text("Terjadi kesalahan: \${snapshot.error}"),
+                    child: Text("Terjadi kesalahan: ${snapshot.error}"),
                   );
                 }
 
@@ -143,22 +146,20 @@ class ReportSuccessPage extends StatelessWidget {
                 }
 
                 final docs = snapshot.data!.docs;
-
                 return Column(
-                  children:
-                      docs.map((doc) {
-                        final data = doc.data() as Map<String, dynamic>;
-                        return MiniArticleCard(
-                          article: data,
-                          onTap: () {
-                            Navigator.pushNamed(
-                              context,
-                              '/detail',
-                              arguments: data,
-                            );
-                          },
+                  children: docs.map((doc) {
+                    final data = doc.data() as Map<String, dynamic>;
+                    return MiniArticleCard(
+                      article: data,
+                      onTap: () {
+                        Navigator.pushNamed(
+                          context,
+                          '/detail',
+                          arguments: data,
                         );
-                      }).toList(),
+                      },
+                    );
+                  }).toList(),
                 );
               },
             ),

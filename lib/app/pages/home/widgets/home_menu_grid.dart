@@ -1,7 +1,9 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:jaga_app/app/pages/articles/page/articles_page.dart';
 import 'package:jaga_app/app/pages/home/page/guide_page.dart';
 import 'package:jaga_app/app/pages/home/page/help_page.dart';
+import 'package:jaga_app/app/pages/login_register_page.dart';
 import 'package:jaga_app/app/pages/report/pages/form_page.dart';
 
 class HomeMenuGrid extends StatelessWidget {
@@ -20,10 +22,41 @@ class HomeMenuGrid extends StatelessWidget {
           icon: Icons.edit,
           title: 'Laporan',
           onTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (_) => const ReportFormPage()),
-            );
+            final user = FirebaseAuth.instance.currentUser;
+            if (user == null) {
+              showDialog(
+                context: context,
+                builder:
+                    (context) => AlertDialog(
+                      title: const Text('Login Diperlukan'),
+                      content: const Text(
+                        'Silakan login terlebih dahulu untuk membuat laporan.',
+                      ),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.pop(context),
+                          child: const Text('Batal'),
+                        ),
+                        TextButton(
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => const LoginRegisterPage(),
+                              ),
+                            );
+                          },
+                          child: const Text('Login'),
+                        ),
+                      ],
+                    ),
+              );
+            } else {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const ReportFormPage()),
+              );
+            }
           },
         ),
         _MenuCard(
@@ -81,20 +114,40 @@ class _MenuCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Card(
       color: color,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: InkWell(
         onTap: onTap,
-        child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(icon, size: 40, color: Colors.white),
-              const SizedBox(height: 10),
-              Text(
-                title,
-                style: const TextStyle(color: Colors.white, fontSize: 16),
+        borderRadius: BorderRadius.circular(12),
+        child: Stack(
+          children: [
+            // Icon di pojok kanan atas dengan background hitam transparan
+            Positioned(
+              top: 10,
+              right: 10,
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Colors.black.withOpacity(0.3),
+                  shape: BoxShape.circle,
+                ),
+                padding: const EdgeInsets.all(8),
+                child: Icon(icon, size: 24, color: Colors.white),
               ),
-            ],
-          ),
+            ),
+
+            // Title di pojok kiri bawah
+            Positioned(
+              left: 12,
+              bottom: 12,
+              child: Text(
+                title,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );

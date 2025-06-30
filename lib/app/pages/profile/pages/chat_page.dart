@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 
 class ChatPage extends StatefulWidget {
-  const ChatPage({super.key});
+  final String? initialMessage;
+
+  const ChatPage({super.key, this.initialMessage});
 
   @override
   State<ChatPage> createState() => _ChatPageState();
@@ -24,6 +26,7 @@ class _ChatPageState extends State<ChatPage> {
   ];
 
   @override
+  @override
   void initState() {
     super.initState();
     messages.add({
@@ -31,6 +34,13 @@ class _ChatPageState extends State<ChatPage> {
       'text':
           'Halo! 👋 Selamat datang di JAGA Bot. Saya siap bantu kamu seputar pelaporan, status aduan, atau pertanyaan lainnya tentang aplikasi JAGA. Pilih pertanyaan yang ingin kamu tanyakan, ya!',
     });
+
+    if (widget.initialMessage != null && widget.initialMessage!.isNotEmpty) {
+      Future.delayed(const Duration(milliseconds: 300), () {
+        _addUserMessage(widget.initialMessage!);
+        _addBotReply(widget.initialMessage!);
+      });
+    }
   }
 
   void _onQuickReplyTapped(String reply) {
@@ -97,12 +107,7 @@ class _ChatPageState extends State<ChatPage> {
               height: 100,
               color: Colors.white,
             ),
-            Text(
-              'BOT',
-              style: TextStyle(
-                color: Colors.white,
-              ),
-            ),
+            Text('BOT', style: TextStyle(color: Colors.white)),
           ],
         ),
       ),
@@ -171,7 +176,10 @@ class _ChatPageState extends State<ChatPage> {
                     ),
                     decoration: BoxDecoration(
                       color: isUser ? Colors.green[100] : Colors.white,
-                      border: isUser ? null : Border.all(color: Colors.grey.shade300),
+                      border:
+                          isUser
+                              ? null
+                              : Border.all(color: Colors.grey.shade300),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Text(message['text'] ?? ''),

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:jaga_app/app/widgets/status_card.dart';
+import 'package:jaga_app/app/pages/report/widgets/status_card.dart';
 import 'package:intl/intl.dart';
 
 class LaporanStatusCard extends StatelessWidget {
@@ -7,6 +7,7 @@ class LaporanStatusCard extends StatelessWidget {
   final String title;
   final String date;
   final String status;
+  final VoidCallback? onDetailPressed;
 
   const LaporanStatusCard({
     super.key,
@@ -14,6 +15,7 @@ class LaporanStatusCard extends StatelessWidget {
     required this.title,
     required this.date,
     required this.status,
+    this.onDetailPressed,
   });
 
   @override
@@ -30,6 +32,7 @@ class LaporanStatusCard extends StatelessWidget {
               : 'Tanggal tidak valid',
           status: status,
           statusColor: _getStatusColor(status),
+          onDetailPressed: onDetailPressed,
         ),
       ],
     );

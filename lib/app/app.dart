@@ -18,11 +18,6 @@ class _MyAppState extends State<MyApp> {
   @override
   void initState() {
     super.initState();
-    initThemeMode();
-  }
-
-  void initThemeMode() {
-    isDarkModeNotifier.value = false;
   }
 
   @override

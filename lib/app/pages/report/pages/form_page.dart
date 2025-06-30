@@ -135,7 +135,7 @@ class _ReportFormPageState extends State<ReportFormPage> {
     if (mounted) {
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (_) => const ReportSuccessPage()),
+        MaterialPageRoute(builder: (_) => ReportSuccessPage(reportId: reportId),),
       );
     }
   }
@@ -193,8 +193,8 @@ class _ReportFormPageState extends State<ReportFormPage> {
                       onChanged:
                           (val) => setState(() => _selectedKategori = val),
                       decoration: const InputDecoration(
-                        hintText: 'Kategori laporan',
-                        prefixIcon: Icon(Icons.group),
+                        hintText: 'Kategori',
+                        prefixIcon: Icon(Icons.category),
                         border: OutlineInputBorder(),
                         isDense: true,
                       ),
@@ -208,7 +208,7 @@ class _ReportFormPageState extends State<ReportFormPage> {
               _buildTextField(
                 _lokasiController,
                 'Lokasi kejadian',
-                suffixIcon: Icons.person_pin_circle,
+                suffixIcon: Icons.location_on,
               ),
               const SizedBox(height: 10),
               _buildTextField(

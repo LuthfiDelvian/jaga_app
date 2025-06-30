@@ -5,6 +5,7 @@ class StatusCard extends StatelessWidget {
   final String date;
   final String status;
   final Color statusColor;
+  final VoidCallback? onDetailPressed;
 
   const StatusCard({
     super.key,
@@ -12,6 +13,7 @@ class StatusCard extends StatelessWidget {
     required this.date,
     required this.status,
     required this.statusColor,
+    this.onDetailPressed,
   });
 
   @override
@@ -66,7 +68,7 @@ class StatusCard extends StatelessWidget {
             ),
           ),
           TextButton(
-            onPressed: () {},
+            onPressed: onDetailPressed,
             child: const Text('Details', style: TextStyle(color: Colors.blue)),
           ),
         ],

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:jaga_app/app/pages/profile/pages/chat_page.dart';
+import 'package:jaga_app/app/pages/profile/pages/feedback_page.dart';
 
 class HelpPage extends StatelessWidget {
   const HelpPage({super.key});
@@ -10,34 +12,25 @@ class HelpPage extends StatelessWidget {
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () {
-            // Aksi ketika tombol kembali ditekan
-            // Jika halaman ini dibuka melalui Navigator.push,
-            // ini akan kembali ke halaman sebelumnya.
             if (Navigator.canPop(context)) {
               Navigator.of(context).pop();
             }
-            // Jika tidak, Anda mungkin perlu implementasi lain,
-            // misalnya jika ini adalah halaman root.
           },
         ),
-        title: Text('Bantuan'),
+        title: const Text('Bantuan'),
       ),
-      body: SafeArea( // Memastikan konten tidak terhalang oleh system UI (status bar, notch)
+      body: SafeArea(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            
-            const SizedBox(height: 12.0), // Jarak antara header "Bantuan" dan konten berikutnya
-
-            // Konten yang Dapat Di-scroll
+            const SizedBox(height: 12.0),
             Expanded(
               child: SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(horizontal: 16.0), // Padding untuk konten list
+                padding: const EdgeInsets.symmetric(horizontal: 16.0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // --- Bagian FAQ (Pertanyaan Umum) ---
-                    _buildCardWithShadow( // Box luar untuk seluruh bagian FAQ
+                    _buildCardWithShadow(
                       child: Padding(
                         padding: const EdgeInsets.all(16.0),
                         child: Column(
@@ -51,21 +44,34 @@ class HelpPage extends StatelessWidget {
                                 color: Colors.black87,
                               ),
                             ),
-                            const SizedBox(height: 16), // Jarak antara judul FAQ dan item pertama
-                            _buildFAQItem(text: 'Bagaimana saya tahu laporan saya diterima?'),
+                            const SizedBox(height: 16),
+                            _buildFAQItem(
+                              text:
+                                  'Bagaimana saya tahu laporan saya diterima?',
+                              context: context,
+                            ),
                             const SizedBox(height: 10),
-                            _buildFAQItem(text: 'Apakah identitas saya benar-benar aman?'),
+                            _buildFAQItem(
+                              text: 'Apakah identitas saya benar-benar aman?',
+                              context: context,
+                            ),
                             const SizedBox(height: 10),
-                            _buildFAQItem(text: 'Apakah saya harus login untuk melapor?'),
+                            _buildFAQItem(
+                              text: 'Apakah saya harus login untuk melapor?',
+                              context: context,
+                            ),
                             const SizedBox(height: 10),
-                            _buildFAQItem(text: 'Bagaimana saya tahu laporan saya diterima?'), // Pertanyaan ini duplikat di gambar
+                            _buildFAQItem(
+                              text:
+                                  'Bagaimana saya tahu laporan saya diterima?',
+                              context: context,
+                            ),
                           ],
                         ),
                       ),
                     ),
-                    const SizedBox(height: 24), // Jarak setelah bagian FAQ
+                    const SizedBox(height: 24),
 
-                    // --- Bagian Hubungi Admin/Live Support ---
                     const Text(
                       'Hubungi Admin/Live Support',
                       style: TextStyle(
@@ -79,10 +85,15 @@ class HelpPage extends StatelessWidget {
                       icon: Icons.chat_bubble_outline_rounded,
                       iconColor: Colors.redAccent,
                       text: 'Chat',
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (_) => const ChatPage()),
+                        );
+                      },
                     ),
                     const SizedBox(height: 24),
 
-                    // --- Bagian Tutorial Interaktif ---
                     const Text(
                       'Tutorial Interaktif',
                       style: TextStyle(
@@ -96,23 +107,30 @@ class HelpPage extends StatelessWidget {
                       icon: Icons.play_circle_outline_rounded,
                       iconColor: Colors.redAccent,
                       text: 'Tutorial',
+                      onTap: () {
+                        // Tambahkan aksi tutorial jika ada
+                      },
                     ),
-                    const SizedBox(height: 32), // Jarak sebelum tombol
+                    const SizedBox(height: 32),
 
-                    // --- Tombol Laporkan Masalah Aplikasi ---
                     SizedBox(
                       width: double.infinity,
                       child: ElevatedButton(
                         onPressed: () {
-                          // Aksi ketika tombol ditekan
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => const FeedbackPage(),
+                            ),
+                          );
                         },
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.red.shade700, // Warna tombol merah
+                          backgroundColor: Colors.red.shade700,
                           padding: const EdgeInsets.symmetric(vertical: 16.0),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(8.0),
                           ),
-                          elevation: 2, // Sedikit shadow untuk tombol
+                          elevation: 2,
                         ),
                         child: const Text(
                           'Laporkan Masalah Aplikasi',
@@ -124,7 +142,7 @@ class HelpPage extends StatelessWidget {
                         ),
                       ),
                     ),
-                    const SizedBox(height: 16), // Jarak di akhir halaman
+                    const SizedBox(height: 16),
                   ],
                 ),
               ),
@@ -135,31 +153,33 @@ class HelpPage extends StatelessWidget {
     );
   }
 
-  /// Helper widget untuk membuat setiap item FAQ.
-  Widget _buildFAQItem({required String text}) {
-    return _buildCardWithShadow( // Setiap item FAQ adalah box tersendiri
-      child: Material( // Menambahkan Material untuk efek ripple saat diklik
+  Widget _buildFAQItem({required String text, required BuildContext context}) {
+    return _buildCardWithShadow(
+      child: Material(
         color: Colors.transparent,
         child: InkWell(
           onTap: () {
-            // Aksi ketika item FAQ diklik
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => ChatPage(initialMessage: text)),
+            );
           },
-          borderRadius: BorderRadius.circular(10.0), // Sesuaikan dengan card
+          borderRadius: BorderRadius.circular(10.0),
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 14.0),
+            padding: const EdgeInsets.symmetric(
+              horizontal: 16.0,
+              vertical: 14.0,
+            ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Expanded( // Expanded agar teks bisa wrap jika panjang
+                Expanded(
                   child: Text(
                     text,
-                    style: const TextStyle(
-                      fontSize: 15,
-                      color: Colors.black87,
-                    ),
+                    style: const TextStyle(fontSize: 15, color: Colors.black87),
                   ),
                 ),
-                const SizedBox(width: 8), // Jarak antara teks dan ikon
+                const SizedBox(width: 8),
                 Icon(
                   Icons.arrow_forward_ios_rounded,
                   size: 16,
@@ -173,22 +193,23 @@ class HelpPage extends StatelessWidget {
     );
   }
 
-  /// Helper widget untuk membuat item aksi seperti Chat dan Tutorial.
   Widget _buildActionItem({
     required IconData icon,
     required Color iconColor,
     required String text,
+    required VoidCallback onTap,
   }) {
     return _buildCardWithShadow(
-      child: Material( // Menambahkan Material untuk efek ripple saat diklik
+      child: Material(
         color: Colors.transparent,
         child: InkWell(
-          onTap: () {
-            // Aksi ketika item diklik
-          },
-          borderRadius: BorderRadius.circular(10.0), // Sesuaikan dengan card
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(10.0),
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 14.0),
+            padding: const EdgeInsets.symmetric(
+              horizontal: 16.0,
+              vertical: 14.0,
+            ),
             child: Row(
               children: [
                 Container(
@@ -197,14 +218,10 @@ class HelpPage extends StatelessWidget {
                     color: iconColor,
                     shape: BoxShape.circle,
                   ),
-                  child: Icon(
-                    icon,
-                    color: Colors.white,
-                    size: 20,
-                  ),
+                  child: Icon(icon, color: Colors.white, size: 20),
                 ),
                 const SizedBox(width: 12),
-                Expanded( // Expanded agar teks bisa wrap jika panjang
+                Expanded(
                   child: Text(
                     text,
                     style: const TextStyle(
@@ -227,18 +244,18 @@ class HelpPage extends StatelessWidget {
     );
   }
 
-  /// Helper widget untuk membuat container (card) putih dengan shadow.
   Widget _buildCardWithShadow({required Widget child}) {
     return Container(
       width: double.infinity,
+      margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(10.0),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.08), // Warna shadow disesuaikan
+            color: Colors.black.withOpacity(0.08),
             blurRadius: 8,
-            offset: const Offset(0, 4), // Posisi shadow hanya di bawah
+            offset: const Offset(0, 4),
           ),
         ],
       ),
