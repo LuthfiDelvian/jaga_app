@@ -1,7 +1,14 @@
+import 'dart:io' as io show File;
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter/services.dart';
+import 'package:path/path.dart' as path;
+import 'package:http/http.dart' as http;
+import 'package:path_provider/path_provider.dart';
+import 'package:open_file/open_file.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class ReportDetailPage extends StatelessWidget {
   final String documentId;
@@ -44,6 +51,7 @@ class ReportDetailPage extends StatelessWidget {
           final kategori = data['kategori'] ?? '-';
           final status = data['status'] ?? 'Menunggu';
           final createdAt = (data['createdAt'] as Timestamp?)?.toDate();
+          final bukti = List<Map<String, dynamic>>.from(data['bukti'] ?? []);
           final formattedCreatedAt =
               createdAt != null
                   ? DateFormat('dd MMM yyyy, HH:mm').format(createdAt)
@@ -64,7 +72,7 @@ class ReportDetailPage extends StatelessWidget {
                             'ID Laporan',
                             style: TextStyle(fontWeight: FontWeight.bold),
                           ),
-                          Spacer(),
+                          const Spacer(),
                           Expanded(child: Text(documentId)),
                           IconButton(
                             icon: const Icon(Icons.copy, size: 18),
@@ -88,7 +96,7 @@ class ReportDetailPage extends StatelessWidget {
                             'Waktu Laporan',
                             style: TextStyle(color: Colors.grey[600]),
                           ),
-                          Spacer(),
+                          const Spacer(),
                           Text(formattedCreatedAt),
                         ],
                       ),
@@ -115,7 +123,7 @@ class ReportDetailPage extends StatelessWidget {
                               fontSize: 16,
                             ),
                           ),
-                          Spacer(),
+                          const Spacer(),
                           Text(
                             formattedCreatedAt,
                             style: TextStyle(
@@ -134,7 +142,7 @@ class ReportDetailPage extends StatelessWidget {
                     judul,
                     style: const TextStyle(
                       fontSize: 16,
-                      fontWeight: FontWeight.bold
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
                 ),
@@ -147,9 +155,7 @@ class ReportDetailPage extends StatelessWidget {
                           children: [
                             Expanded(child: Text(kategori)),
                             const SizedBox(width: 8),
-                            const Icon(
-                              Icons.category,
-                            ),
+                            const Icon(Icons.category),
                           ],
                         ),
                       ),
@@ -192,6 +198,167 @@ class ReportDetailPage extends StatelessWidget {
                     ],
                   ),
                 ),
+                const SizedBox(height: 12),
+                if (bukti.isNotEmpty)
+                  _buildCard(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'Bukti Unggahan',
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                        const SizedBox(height: 8),
+                        ListView.builder(
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
+                          itemCount: bukti.length,
+                          itemBuilder: (context, index) {
+                            final file = bukti[index];
+                            final url = file['url'] ?? '';
+                            final name = file['name'] ?? 'File';
+                            final type = (file['type'] ?? '').toLowerCase();
+                            final isImage = [
+                              'jpg',
+                              'jpeg',
+                              'png',
+                              'webp',
+                            ].contains(type);
+
+                            return Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 6),
+                              child:
+                                  isImage
+                                      ? GestureDetector(
+                                        onTap:
+                                            () => showDialog(
+                                              context: context,
+                                              builder:
+                                                  (_) => Dialog(
+                                                    child: InteractiveViewer(
+                                                      child: Image.network(url),
+                                                    ),
+                                                  ),
+                                            ),
+                                        child: Row(
+                                          children: [
+                                            ClipRRect(
+                                              borderRadius:
+                                                  BorderRadius.circular(6),
+                                              child: Image.network(
+                                                url,
+                                                width: 50,
+                                                height: 50,
+                                                fit: BoxFit.cover,
+                                              ),
+                                            ),
+                                            const SizedBox(width: 10),
+                                            Expanded(
+                                              child: Text(
+                                                name,
+                                                overflow: TextOverflow.ellipsis,
+                                                style: const TextStyle(
+                                                  decoration:
+                                                      TextDecoration.underline,
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      )
+                                      : GestureDetector(
+                                        onTap: () async {
+                                          if (kIsWeb) {
+                                            // Untuk Flutter Web: buka file di tab baru
+                                            final uri = Uri.parse(url);
+                                            if (await canLaunchUrl(uri)) {
+                                              await launchUrl(
+                                                uri,
+                                                mode:
+                                                    LaunchMode
+                                                        .externalApplication,
+                                              );
+                                            } else {
+                                              ScaffoldMessenger.of(
+                                                context,
+                                              ).showSnackBar(
+                                                const SnackBar(
+                                                  content: Text(
+                                                    'Gagal membuka file di browser',
+                                                  ),
+                                                ),
+                                              );
+                                            }
+                                          } else {
+                                            try {
+                                              final response = await http.get(
+                                                Uri.parse(url),
+                                              );
+                                              final bytes = response.bodyBytes;
+
+                                              final tempDir =
+                                                  await getTemporaryDirectory();
+                                              final filePath = path.join(
+                                                tempDir.path,
+                                                name,
+                                              );
+                                              final fileOut = io.File(filePath);
+                                              await fileOut.writeAsBytes(bytes);
+
+                                              final result =
+                                                  await OpenFile.open(filePath);
+                                              if (result.type !=
+                                                  ResultType.done) {
+                                                ScaffoldMessenger.of(
+                                                  context,
+                                                ).showSnackBar(
+                                                  SnackBar(
+                                                    content: Text(
+                                                      'Gagal membuka file: ${result.message}',
+                                                    ),
+                                                  ),
+                                                );
+                                              }
+                                            } catch (e) {
+                                              ScaffoldMessenger.of(
+                                                context,
+                                              ).showSnackBar(
+                                                SnackBar(
+                                                  content: Text(
+                                                    'Gagal mengunduh file: $e',
+                                                  ),
+                                                ),
+                                              );
+                                            }
+                                          }
+                                        },
+
+                                        child: Row(
+                                          children: [
+                                            const Icon(
+                                              Icons.insert_drive_file,
+                                              color: Colors.grey,
+                                            ),
+                                            const SizedBox(width: 10),
+                                            Expanded(
+                                              child: Text(
+                                                name,
+                                                style: const TextStyle(
+                                                  decoration:
+                                                      TextDecoration.underline,
+                                                ),
+                                                overflow: TextOverflow.ellipsis,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                            );
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
               ],
             ),
           );
@@ -204,6 +371,7 @@ class ReportDetailPage extends StatelessWidget {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(14),
+      margin: const EdgeInsets.only(bottom: 10),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),

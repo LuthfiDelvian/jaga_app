@@ -3,7 +3,6 @@ import 'dart:typed_data';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dotted_border/dotted_border.dart';
 import 'package:file_picker/file_picker.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:jaga_app/app/pages/report/pages/form_success_page.dart';
@@ -24,11 +23,10 @@ class _ReportFormPageState extends State<ReportFormPage> {
 
   bool _isAnonim = false;
   String? _selectedKategori;
-  // ignore: unused_field
   DateTime? _selectedDate;
 
   List<PlatformFile> _pickedFiles = [];
-  List<String> _uploadedImageUrls = [];
+  List<Map<String, dynamic>> _uploadedFiles = [];
 
   final kategoriOptions = ['PENGADUAN', 'ASPIRASI', 'PENYUAPAN'];
 
@@ -54,7 +52,7 @@ class _ReportFormPageState extends State<ReportFormPage> {
     );
     if (result != null) {
       setState(() {
-        _pickedFiles = result.files;
+        _pickedFiles.addAll(result.files);
       });
     }
   }
@@ -62,28 +60,35 @@ class _ReportFormPageState extends State<ReportFormPage> {
   Future<String?> _uploadToCloudinary(
     Uint8List fileBytes,
     String fileName,
+    String reportId,
   ) async {
     const cloudName = 'dp0iysyni';
-    const uploadPreset = 'jaga_reports';
+    const uploadPreset = 'jaga_laporan';
 
     final url = Uri.parse(
-      'https://api.cloudinary.com/v1_1/$cloudName/image/upload',
+      'https://api.cloudinary.com/v1_1/$cloudName/auto/upload',
     );
+
     final request =
         http.MultipartRequest('POST', url)
           ..fields['upload_preset'] = uploadPreset
-          ..fields['public_id'] = fileName
+          ..fields['public_id'] = 'laporan/$reportId/$fileName'
+          ..headers['Accept'] = 'application/json'
           ..files.add(
             http.MultipartFile.fromBytes('file', fileBytes, filename: fileName),
           );
 
     final response = await request.send();
+    final respStr = await response.stream.bytesToString();
+    print("Cloudinary response: $respStr");
+
     if (response.statusCode == 200) {
-      final respStr = await response.stream.bytesToString();
       final jsonResp = json.decode(respStr);
       return jsonResp['secure_url'];
+    } else {
+      print("Upload failed with status: ${response.statusCode}");
+      return null;
     }
-    return null;
   }
 
   Future<void> _submitReport() async {
@@ -104,27 +109,37 @@ class _ReportFormPageState extends State<ReportFormPage> {
       return;
     }
 
-    _uploadedImageUrls.clear();
+    final reportId = "JAGA-${DateTime.now().millisecondsSinceEpoch}";
+    _uploadedFiles.clear();
+
     for (final file in _pickedFiles) {
-      final ext = file.extension?.toLowerCase();
-      if (file.bytes != null && ['jpg', 'jpeg', 'png', 'webp'].contains(ext)) {
-        final uploadedUrl = await _uploadToCloudinary(file.bytes!, file.name);
-        if (uploadedUrl != null) _uploadedImageUrls.add(uploadedUrl);
+      if (file.bytes != null) {
+        final uploadedUrl = await _uploadToCloudinary(
+          file.bytes!,
+          file.name,
+          reportId,
+        );
+        if (uploadedUrl != null) {
+          _uploadedFiles.add({
+            'name': file.name,
+            'url': uploadedUrl,
+            'type': file.extension ?? 'unknown',
+          });
+        }
       }
     }
 
-    final reportId = "JAGA-${DateTime.now().millisecondsSinceEpoch}";
     final data = {
       'id': reportId,
+      'uid': uid,
       'judul': judul,
-      'uid' : uid,
       'isi': isi,
       'lokasi': lokasi,
       'tanggal': tanggal,
       'kategori': _selectedKategori,
       'anonim': _isAnonim,
       'status': 'Menunggu',
-      'bukti': _uploadedImageUrls,
+      'bukti': _uploadedFiles,
       'createdAt': Timestamp.now(),
     };
 
@@ -132,12 +147,99 @@ class _ReportFormPageState extends State<ReportFormPage> {
         .collection('laporan')
         .doc(reportId)
         .set(data);
+
     if (mounted) {
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (_) => ReportSuccessPage(reportId: reportId),),
+        MaterialPageRoute(
+          builder: (_) => ReportSuccessPage(reportId: reportId),
+        ),
       );
     }
+  }
+
+  Widget _buildDateField() {
+    return TextField(
+      controller: _tanggalController,
+      readOnly: true,
+      onTap: _pickTanggal,
+      decoration: const InputDecoration(
+        hintText: 'Tanggal kejadian',
+        suffixIcon: Icon(Icons.calendar_today),
+        border: OutlineInputBorder(),
+        isDense: true,
+      ),
+    );
+  }
+
+  Widget _buildTextField(
+    TextEditingController controller,
+    String hint, {
+    int maxLines = 1,
+    IconData? suffixIcon,
+  }) {
+    return TextField(
+      controller: controller,
+      maxLines: maxLines,
+      decoration: InputDecoration(
+        hintText: hint,
+        suffixIcon: suffixIcon != null ? Icon(suffixIcon) : null,
+        border: const OutlineInputBorder(),
+        isDense: true,
+      ),
+    );
+  }
+
+  IconData _getFileIcon(String type) {
+    switch (type.toLowerCase()) {
+      case 'jpg':
+      case 'jpeg':
+      case 'png':
+        return Icons.image;
+      case 'pdf':
+        return Icons.picture_as_pdf;
+      case 'doc':
+      case 'docx':
+        return Icons.description;
+      case 'xls':
+      case 'xlsx':
+        return Icons.table_chart;
+      case 'ppt':
+      case 'pptx':
+        return Icons.slideshow;
+      default:
+        return Icons.insert_drive_file;
+    }
+  }
+
+  Future<bool> _showConfirmationDialog() async {
+    return await showDialog<bool>(
+          context: context,
+          builder:
+              (context) => AlertDialog(
+                title: const Text('Konfirmasi'),
+                content: const Text(
+                  'Apakah Anda yakin ingin mengirim laporan ini?',
+                ),
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.of(context).pop(false),
+                    child: const Text('Batal'),
+                  ),
+                  ElevatedButton(
+                    onPressed: () => Navigator.of(context).pop(true),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.red,
+                    ),
+                    child: const Text(
+                      'Kirim',
+                      style: TextStyle(color: Colors.white),
+                    ),
+                  ),
+                ],
+              ),
+        ) ??
+        false;
   }
 
   @override
@@ -160,7 +262,7 @@ class _ReportFormPageState extends State<ReportFormPage> {
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(12),
-            boxShadow: [
+            boxShadow: const [
               BoxShadow(
                 color: Colors.black12,
                 blurRadius: 6,
@@ -240,36 +342,17 @@ class _ReportFormPageState extends State<ReportFormPage> {
                         itemCount: _pickedFiles.length,
                         itemBuilder: (context, index) {
                           final file = _pickedFiles[index];
-                          return Padding(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 8,
-                              vertical: 4,
+                          return ListTile(
+                            leading: Icon(_getFileIcon(file.extension ?? '')),
+                            title: Text(
+                              file.name,
+                              overflow: TextOverflow.ellipsis,
                             ),
-                            child: Row(
-                              children: [
-                                const Icon(
-                                  Icons.insert_drive_file,
-                                  color: Colors.grey,
-                                ),
-                                const SizedBox(width: 8),
-                                Expanded(
-                                  child: Text(
-                                    file.name,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                ),
-                                IconButton(
-                                  icon: const Icon(
-                                    Icons.delete,
-                                    color: Colors.red,
-                                  ),
-                                  onPressed: () {
-                                    setState(() {
-                                      _pickedFiles.removeAt(index);
-                                    });
-                                  },
-                                ),
-                              ],
+                            trailing: IconButton(
+                              icon: const Icon(Icons.delete, color: Colors.red),
+                              onPressed: () {
+                                setState(() => _pickedFiles.removeAt(index));
+                              },
                             ),
                           );
                         },
@@ -281,7 +364,13 @@ class _ReportFormPageState extends State<ReportFormPage> {
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-                  onPressed: _submitReport,
+                  onPressed: () async {
+                    final confirm = await _showConfirmationDialog();
+                    if (confirm) {
+                      _submitReport();
+                    }
+                  },
+
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.red,
                     padding: const EdgeInsets.symmetric(vertical: 14),
@@ -301,38 +390,6 @@ class _ReportFormPageState extends State<ReportFormPage> {
             ],
           ),
         ),
-      ),
-    );
-  }
-
-  Widget _buildDateField() {
-    return TextField(
-      controller: _tanggalController,
-      readOnly: true,
-      onTap: _pickTanggal,
-      decoration: const InputDecoration(
-        hintText: 'Tanggal kejadian',
-        suffixIcon: Icon(Icons.calendar_today),
-        border: OutlineInputBorder(),
-        isDense: true,
-      ),
-    );
-  }
-
-  Widget _buildTextField(
-    TextEditingController controller,
-    String hint, {
-    int maxLines = 1,
-    IconData? suffixIcon,
-  }) {
-    return TextField(
-      controller: controller,
-      maxLines: maxLines,
-      decoration: InputDecoration(
-        hintText: hint,
-        suffixIcon: suffixIcon != null ? Icon(suffixIcon) : null,
-        border: const OutlineInputBorder(),
-        isDense: true,
       ),
     );
   }
