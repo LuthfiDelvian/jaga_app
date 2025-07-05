@@ -23,6 +23,7 @@ class _ReportFormPageState extends State<ReportFormPage> {
 
   bool _isAnonim = false;
   String? _selectedKategori;
+  // ignore: unused_field
   DateTime? _selectedDate;
 
   List<PlatformFile> _pickedFiles = [];
