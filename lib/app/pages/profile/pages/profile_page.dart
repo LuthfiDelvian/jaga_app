@@ -7,9 +7,55 @@ import 'package:jaga_app/app/services/auth_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
+import 'package:jaga_app/app/services/helper_fcm_token.dart';
 
-class ProfilePage extends StatelessWidget {
+class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
+
+  @override
+  State<ProfilePage> createState() => _ProfilePageState();
+}
+
+class _ProfilePageState extends State<ProfilePage> {
+  bool _notifEnabled = true;
+  bool _loadingSwitch = false;
+  String? _vapidKey =
+      "BCxmXJoOl_8nm6WzqKMudqglESjSJv9riFPiiWn5J3LlOsdCDGVZKV3ByF0BknQgFZ-WAFlqFnxdGYTBAbrVqp0"; // isi VAPID Key web (Android biarkan null)
+
+  @override
+  void initState() {
+    super.initState();
+    _loadNotifStatus();
+  }
+
+  Future<void> _loadNotifStatus() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      final doc =
+          await FirebaseFirestore.instance
+              .collection('users')
+              .doc(user.uid)
+              .get();
+      setState(() {
+        _notifEnabled = doc.data()?['notif_enabled'] ?? true;
+      });
+    }
+  }
+
+  Future<void> _setNotifEnabled(bool value) async {
+    setState(() => _loadingSwitch = true);
+    if (value) {
+      await saveFcmTokenToFirestore(
+        vapidKey: _vapidKey,
+      ); // <-- Web/Android auto
+    } else {
+      await deleteFcmTokenFromFirestore();
+    }
+    setState(() {
+      _notifEnabled = value;
+      _loadingSwitch = false;
+    });
+  }
 
   Color getStatusColor(String status) {
     switch (status.toLowerCase()) {
@@ -118,14 +164,22 @@ class ProfilePage extends StatelessWidget {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             const Text('Notifikasi'),
-                            Switch(
-                              value: true,
-                              onChanged: (_) {},
-                              activeColor: Colors.white,
-                              activeTrackColor: Colors.red,
-                              inactiveThumbColor: Colors.white,
-                              inactiveTrackColor: Colors.grey.shade300,
-                            ),
+                            _loadingSwitch
+                                ? const SizedBox(
+                                  width: 36,
+                                  height: 36,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                  ),
+                                )
+                                : Switch(
+                                  value: _notifEnabled,
+                                  onChanged: _setNotifEnabled,
+                                  activeColor: Colors.white,
+                                  activeTrackColor: Colors.red,
+                                  inactiveThumbColor: Colors.white,
+                                  inactiveTrackColor: Colors.grey.shade300,
+                                ),
                           ],
                         ),
                       ),

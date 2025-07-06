@@ -1,50 +1,44 @@
-/**
- * Import function triggers from their respective submodules:
- *
- * const {onCall} = require("firebase-functions/v2/https");
- * const {onDocumentWritten} = require("firebase-functions/v2/firestore");
- *
- * See a full list of supported triggers at https://firebase.google.com/docs/functions
- */
-
-const {onRequest} = require("firebase-functions/v2/https");
-const logger = require("firebase-functions/logger");
-
-// Create and deploy your first functions
-// https://firebase.google.com/docs/functions/get-started
-
-// exports.helloWorld = onRequest((request, response) => {
-//   logger.info("Hello logs!", {structuredData: true});
-//   response.send("Hello from Firebase!");
-// });
-
 const functions = require("firebase-functions");
 const admin = require("firebase-admin");
 admin.initializeApp();
 
-const db = admin.firestore();
-const auth = admin.auth();
+exports.sendLaporanStatusChanged = functions.firestore
+  .document('laporan/{laporanId}')
+  .onUpdate(async (change, context) => {
+    const before = change.before.data();
+    const after = change.after.data();
+    const laporanId = context.params.laporanId;
 
-exports.deleteOldUsers = functions.pubsub.schedule("every 24 hours").onRun(async (context) => {
-  const now = admin.firestore.Timestamp.now();
-  const sevenDaysAgo = new Date(now.toDate().getTime() - 7 * 24 * 60 * 60 * 1000);
+    // Kirim notif hanya jika field 'status' berubah
+    if (before.status === after.status) {
+      return null;
+    }
 
-  const snapshot = await db.collection("users")
-    .where("created_at", "<=", sevenDaysAgo)
-    .get();
+    const userId = after.uid; // pastikan field uid di laporan
+    if (!userId) return null;
 
-  const deletions = [];
+    // Ambil fcm_token user dari koleksi users
+    const userSnap = await admin.firestore().collection('users').doc(userId).get();
+    const fcmToken = userSnap.data()?.fcm_token;
+    if (!fcmToken) {
+      console.log('No FCM token for user:', userId);
+      return null;
+    }
 
-  snapshot.forEach(doc => {
-    const uid = doc.id;
+    // Kirim FCM
+    const payload = {
+      notification: {
+        title: 'Status Laporan Diubah',
+        body: `Status laporan "${after.judul}" telah diubah menjadi ${after.status}`,
+      },
+      data: {
+        laporanId: laporanId,
+        type: 'laporan',
+      },
+    };
 
-    deletions.push(
-      auth.deleteUser(uid).catch(console.error),
-      db.collection("users").doc(uid).delete().catch(console.error)
-    );
+    await admin.messaging().sendToDevice(fcmToken, payload);
+
+    console.log(`Notifikasi dikirim ke user ${userId}, laporan ${laporanId}`);
+    return null;
   });
-
-  await Promise.all(deletions);
-
-  console.log(`Deleted ${snapshot.size} old users`);
-});

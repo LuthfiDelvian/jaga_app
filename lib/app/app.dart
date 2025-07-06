@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+
 import 'package:jaga_app/app/layout/widget_tree.dart';
 import 'package:jaga_app/app/pages/articles/page/article_detail_page.dart';
 import 'package:jaga_app/app/pages/home/page/home_page.dart';
@@ -15,9 +18,84 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
+  final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+      FlutterLocalNotificationsPlugin();
+
   @override
   void initState() {
     super.initState();
+    _initFirebaseMessaging();
+  }
+
+  Future<void> _initFirebaseMessaging() async {
+    // Request permission (iOS & Android 13+)
+    await FirebaseMessaging.instance.requestPermission();
+
+    // Local notification init (Android)
+    const AndroidInitializationSettings initializationSettingsAndroid =
+        AndroidInitializationSettings('@mipmap/ic_launcher');
+    const InitializationSettings initializationSettings =
+        InitializationSettings(android: initializationSettingsAndroid);
+
+    await flutterLocalNotificationsPlugin.initialize(
+      initializationSettings,
+      onDidReceiveNotificationResponse: (payload) {
+        // Optional: handle tap on notification in foreground
+      },
+    );
+
+    // Notifikasi masuk saat app foreground
+    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+      final notif = message.notification;
+      final android = notif?.android;
+      if (notif != null && android != null) {
+        flutterLocalNotificationsPlugin.show(
+          notif.hashCode,
+          notif.title,
+          notif.body,
+          const NotificationDetails(
+            android: AndroidNotificationDetails(
+              'jaga_channel',
+              'JAGA Notifikasi',
+              channelDescription: 'Notifikasi JAGA',
+              importance: Importance.max,
+              priority: Priority.high,
+              playSound: true,
+            ),
+          ),
+          payload: message.data.isNotEmpty ? message.data.toString() : null,
+        );
+      }
+    });
+
+    // Notifikasi diklik (background/terminated)
+    FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
+      _handleNotificationClick(context, message.data);
+    });
+
+    // Untuk app terminated (cold start)
+    _checkInitialMessage();
+  }
+
+  Future<void> _checkInitialMessage() async {
+    final message = await FirebaseMessaging.instance.getInitialMessage();
+    if (message != null) {
+      _handleNotificationClick(context, message.data);
+    }
+  }
+
+  void _handleNotificationClick(BuildContext context, Map<String, dynamic> data) {
+    // Routing: Artikel
+    if (data['artikelId'] != null) {
+      Navigator.pushNamed(context, '/detail', arguments: {'id': data['artikelId']});
+    }
+    // Routing: Laporan
+    else if (data['laporanId'] != null) {
+      // Tambahkan navigator ke halaman detail laporan kamu di sini.
+      // Misal:
+      // Navigator.push(context, MaterialPageRoute(builder: (_) => ReportDetailPage(documentId: data['laporanId'])));
+    }
+    // Tambah else if jika notif lain
   }
 
   @override
@@ -31,7 +109,10 @@ class _MyAppState extends State<MyApp> {
           darkTheme: AppTheme.darkTheme,
           themeMode: isDarkMode ? ThemeMode.dark : ThemeMode.light,
           home: const RootPage(),
-          routes: {'/detail': (context) => const ArticleDetailPage()},
+          routes: {
+            '/detail': (context) => const ArticleDetailPage(),
+            // '/laporan_detail': (context) => ReportDetailPage(), // tambahkan jika punya
+          },
         );
       },
     );
@@ -52,7 +133,6 @@ class _RootPageState extends State<RootPage> {
   @override
   void initState() {
     super.initState();
-    // Tampilkan WelcomePage selama 2 detik
     Future.delayed(const Duration(seconds: 2), () {
       setState(() {
         _showWelcome = false;
@@ -63,7 +143,6 @@ class _RootPageState extends State<RootPage> {
   @override
   Widget build(BuildContext context) {
     if (_showWelcome) return const WelcomePage();
-    // Setelah WelcomePage, cek login
     return StreamBuilder<User?>(
       stream: FirebaseAuth.instance.authStateChanges(),
       builder: (context, snapshot) {
@@ -74,10 +153,8 @@ class _RootPageState extends State<RootPage> {
         }
         final user = snapshot.data;
         if (user == null) {
-          // Belum login: HomePage (tanpa WidgetTree, tanpa AppBar utama)
           return const HomePage();
         }
-        // Sudah login: WidgetTree (AppBar utama & bottom navbar), HomePage ada di body WidgetTree
         return const WidgetTree();
       },
     );
