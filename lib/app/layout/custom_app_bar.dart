@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:jaga_app/app/pages/profile/pages/chat_page.dart';
 import 'package:jaga_app/app/pages/profile/pages/notifications_page.dart';
 
@@ -22,16 +23,26 @@ PreferredSizeWidget? buildCustomAppBar(BuildContext context, int selectedPage) {
         );
       },
     ),
-
     title: Image.asset('assets/images/jaga-icon.png', height: 100),
     centerTitle: true,
     actions: [
       IconButton(
         icon: const Icon(Icons.notifications, color: Colors.red),
-        onPressed: () {
+        onPressed: () async {
+          final user = FirebaseAuth.instance.currentUser;
+          if (user == null) {
+            // Bisa tampilkan dialog/login
+            ScaffoldMessenger.of(
+              context,
+            ).showSnackBar(const SnackBar(content: Text('Anda belum login')));
+            return;
+          }
+
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (_) => const NotificationsPage()),
+            MaterialPageRoute(
+              builder: (_) => NotificationsPage(currentUserId: user.uid),
+            ),
           );
         },
       ),

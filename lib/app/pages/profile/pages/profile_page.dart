@@ -59,14 +59,14 @@ class _ProfilePageState extends State<ProfilePage> {
 
   Color getStatusColor(String status) {
     switch (status.toLowerCase()) {
-      case 'diterima':
-        return Colors.green;
       case 'diproses':
         return Colors.orange;
-      case 'menunggu':
-        return Colors.grey;
+      case 'ditolak':
+        return Colors.red;
+      case 'selesai':
+        return Colors.green;
       default:
-        return Colors.blueGrey;
+        return Colors.grey;
     }
   }
 
