@@ -5,7 +5,6 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 import 'package:jaga_app/app/layout/widget_tree.dart';
 import 'package:jaga_app/app/pages/articles/page/article_detail_page.dart';
-import 'package:jaga_app/app/pages/home/page/home_page.dart';
 import 'layout/welcome_page.dart';
 import 'package:jaga_app/core/notifiers/theme_notifier.dart';
 import 'package:jaga_app/core/theme/app_theme.dart';
@@ -84,10 +83,17 @@ class _MyAppState extends State<MyApp> {
     }
   }
 
-  void _handleNotificationClick(BuildContext context, Map<String, dynamic> data) {
+  void _handleNotificationClick(
+    BuildContext context,
+    Map<String, dynamic> data,
+  ) {
     // Routing: Artikel
     if (data['artikelId'] != null) {
-      Navigator.pushNamed(context, '/detail', arguments: {'id': data['artikelId']});
+      Navigator.pushNamed(
+        context,
+        '/detail',
+        arguments: {'id': data['artikelId']},
+      );
     }
     // Routing: Laporan
     else if (data['laporanId'] != null) {
@@ -120,29 +126,11 @@ class _MyAppState extends State<MyApp> {
 }
 
 /// Alur WelcomePage -> HomePage (belum login) -> WidgetTree (sudah login)
-class RootPage extends StatefulWidget {
+class RootPage extends StatelessWidget {
   const RootPage({super.key});
 
   @override
-  State<RootPage> createState() => _RootPageState();
-}
-
-class _RootPageState extends State<RootPage> {
-  bool _showWelcome = true;
-
-  @override
-  void initState() {
-    super.initState();
-    Future.delayed(const Duration(seconds: 2), () {
-      setState(() {
-        _showWelcome = false;
-      });
-    });
-  }
-
-  @override
   Widget build(BuildContext context) {
-    if (_showWelcome) return const WelcomePage();
     return StreamBuilder<User?>(
       stream: FirebaseAuth.instance.authStateChanges(),
       builder: (context, snapshot) {
@@ -151,10 +139,14 @@ class _RootPageState extends State<RootPage> {
             body: Center(child: CircularProgressIndicator()),
           );
         }
+
         final user = snapshot.data;
         if (user == null) {
-          return const HomePage();
+          // Belum login → arahkan ke WelcomePage dulu
+          return const WelcomePage();
         }
+
+        // Sudah login → langsung ke aplikasi
         return const WidgetTree();
       },
     );

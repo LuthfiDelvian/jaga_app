@@ -22,6 +22,13 @@ class _ProfilePageState extends State<ProfilePage> {
   String? _vapidKey =
       "BCxmXJoOl_8nm6WzqKMudqglESjSJv9riFPiiWn5J3LlOsdCDGVZKV3ByF0BknQgFZ-WAFlqFnxdGYTBAbrVqp0"; // isi VAPID Key web (Android biarkan null)
 
+  bool _showLanguageDropdown = false;
+  String _selectedLanguage = 'Bahasa Indonesia';
+  final List<String> languageOptions = [
+    'Bahasa Indonesia',
+    'English',
+  ];
+
   @override
   void initState() {
     super.initState();
@@ -183,7 +190,54 @@ class _ProfilePageState extends State<ProfilePage> {
                           ],
                         ),
                       ),
-                      ProfileSettingCard(label: 'Bahasa Indonesia'),
+                      ProfileSettingCard(
+                        label: _selectedLanguage,
+                        onTap: () {
+                          setState(() {
+                            _showLanguageDropdown = !_showLanguageDropdown;
+                          });
+                        },
+                      ),
+                      if (_showLanguageDropdown)
+                        Container(
+                          margin: const EdgeInsets.only(top: 6),
+                          decoration: BoxDecoration(
+                            border: Border.all(color: Colors.grey.shade200),
+                            borderRadius: BorderRadius.circular(10),
+                            color: Colors.grey[50],
+                          ),
+                          child: Column(
+                            children:
+                                languageOptions.map((lang) {
+                                  final isSelected = lang == _selectedLanguage;
+                                  return ListTile(
+                                    title: Text(lang),
+                                    trailing:
+                                        isSelected
+                                            ? const Icon(
+                                              Icons.check,
+                                              color: Colors.red,
+                                            )
+                                            : null,
+                                    onTap: () {
+                                      setState(() {
+                                        _selectedLanguage = lang;
+                                        _showLanguageDropdown = false;
+                                      });
+                                      ScaffoldMessenger.of(
+                                        context,
+                                      ).showSnackBar(
+                                        SnackBar(
+                                          content: Text(
+                                            'Bahasa dipilih: $lang',
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                  );
+                                }).toList(),
+                          ),
+                        ),
                       const SizedBox(height: 12),
                       ProfileSettingCard(
                         label: 'Keluar',

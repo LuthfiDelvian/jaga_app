@@ -3,8 +3,15 @@ import 'package:flutter/material.dart';
 import '../widgets/article_card.dart';
 import '../widgets/article_search_bar.dart';
 
-class ArticlesPage extends StatelessWidget {
+class ArticlesPage extends StatefulWidget {
   const ArticlesPage({super.key});
+
+  @override
+  State<ArticlesPage> createState() => _ArticlesPageState();
+}
+
+class _ArticlesPageState extends State<ArticlesPage> {
+  String _searchKeyword = '';
 
   @override
   Widget build(BuildContext context) {
@@ -20,7 +27,13 @@ class ArticlesPage extends StatelessWidget {
         child: Column(
           children: [
             const SizedBox(height: 10),
-            const ArticleSearchBar(),
+            ArticleSearchBar(
+              onChanged: (value) {
+                setState(() {
+                  _searchKeyword = value.toLowerCase();
+                });
+              },
+            ),
             const SizedBox(height: 16),
             Expanded(
               child: StreamBuilder<QuerySnapshot>(
@@ -36,13 +49,22 @@ class ArticlesPage extends StatelessWidget {
                     return const Center(child: Text('Belum ada artikel.'));
                   }
 
-                  final articles = snapshot.data!.docs;
+                  final articles = snapshot.data!.docs.where((doc) {
+                    final data = doc.data() as Map<String, dynamic>;
+                    final title = data['judul']?.toString().toLowerCase() ?? '';
+                    final content = data['konten']?.toString().toLowerCase() ?? '';
+                    return title.contains(_searchKeyword) ||
+                        content.contains(_searchKeyword);
+                  }).toList();
+
+                  if (articles.isEmpty) {
+                    return const Center(child: Text('Tidak ditemukan.'));
+                  }
 
                   return ListView.builder(
                     itemCount: articles.length,
                     itemBuilder: (context, index) {
                       final data = articles[index].data() as Map<String, dynamic>;
-
                       return ArticleCard(
                         article: data,
                         onTap: () {

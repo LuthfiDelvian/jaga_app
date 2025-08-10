@@ -18,7 +18,7 @@ class ReportDetailPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF4F4F4),
+      backgroundColor: Color.fromARGB(255, 255, 255, 255),
       appBar: AppBar(
         backgroundColor: Colors.red,
         title: const Text(
@@ -103,14 +103,14 @@ class ReportDetailPage extends StatelessWidget {
                     ],
                   ),
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: 8),
                 _buildCard(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
                         'Status laporan',
-                        style: TextStyle(color: Colors.grey[600]),
+                        style: TextStyle(fontWeight: FontWeight.bold),
                       ),
                       const SizedBox(height: 6),
                       Row(
@@ -136,7 +136,7 @@ class ReportDetailPage extends StatelessWidget {
                     ],
                   ),
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: 8),
                 _buildCard(
                   child: Text(
                     judul,
@@ -146,7 +146,7 @@ class ReportDetailPage extends StatelessWidget {
                     ),
                   ),
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: 8),
                 Row(
                   children: [
                     Expanded(
@@ -174,7 +174,7 @@ class ReportDetailPage extends StatelessWidget {
                     ),
                   ],
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: 8),
                 _buildCard(
                   child: Row(
                     children: [
@@ -184,7 +184,7 @@ class ReportDetailPage extends StatelessWidget {
                     ],
                   ),
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: 8),
                 _buildCard(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -198,7 +198,7 @@ class ReportDetailPage extends StatelessWidget {
                     ],
                   ),
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: 8),
                 if (bukti.isNotEmpty)
                   _buildCard(
                     child: Column(
@@ -375,9 +375,10 @@ class ReportDetailPage extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
-        boxShadow: const [
-          BoxShadow(color: Colors.black12, blurRadius: 6, offset: Offset(0, 3)),
-        ],
+        border: Border.all(
+          color: Colors.grey[300]!,
+          width: 1,
+        ),
       ),
       child: child,
     );
@@ -385,14 +386,14 @@ class ReportDetailPage extends StatelessWidget {
 
   Color _getStatusColor(String status) {
     switch (status.toLowerCase()) {
-      case 'diterima':
-        return Colors.green;
       case 'diproses':
         return Colors.orange;
-      case 'menunggu':
-        return Colors.grey;
+      case 'ditolak':
+        return Colors.red;
+      case 'selesai':
+        return Colors.green;
       default:
-        return Colors.blueGrey;
+        return Colors.grey;
     }
   }
 }

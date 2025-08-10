@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
 
 class ArticleSearchBar extends StatelessWidget {
-  const ArticleSearchBar({super.key});
+  final ValueChanged<String>? onChanged;
+
+  const ArticleSearchBar({
+    super.key,
+    this.onChanged,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -17,9 +22,10 @@ class ArticleSearchBar extends StatelessWidget {
           ),
         ],
       ),
-      child: const TextField(
-        decoration: InputDecoration(
-          hintText: 'Search...',
+      child: TextField(
+        onChanged: onChanged,
+        decoration: const InputDecoration(
+          hintText: 'Cari artikel...',
           suffixIcon: Icon(Icons.search),
           border: InputBorder.none,
           contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 14),
